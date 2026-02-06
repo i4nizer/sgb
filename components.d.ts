@@ -15,6 +15,5 @@ declare module 'vue' {
     ReadingChart: typeof import('./src/components/app/monitor/ReadingChart.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    WelcomeBackCard: typeof import('./src/components/app/home/WelcomeBackCard.vue')['default']
   }
 }

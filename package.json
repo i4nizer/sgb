@@ -11,6 +11,9 @@
 		"type-check": "vue-tsc --build --force"
 	},
 	"dependencies": {
+		"@capacitor/android": "^8.0.2",
+		"@capacitor/cli": "^8.0.2",
+		"@capacitor/core": "^8.0.2",
 		"@fontsource/roboto": "5.2.7",
 		"@mdi/font": "7.4.47",
 		"chart.js": "^4.5.1",
