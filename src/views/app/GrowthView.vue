@@ -1,5 +1,5 @@
 <template>
-    <v-container class="bg-white fill-height" fluid>
+    <v-container class="">
         <v-row dense>
             <v-col cols="12">
                 <v-empty-state

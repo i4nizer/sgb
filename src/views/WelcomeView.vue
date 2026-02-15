@@ -1,5 +1,5 @@
 <template>
-    <v-container class="bg-white" fluid>
+    <v-container>
         <v-row dense>
             <v-col cols="12" sm="6">
                 Well Come

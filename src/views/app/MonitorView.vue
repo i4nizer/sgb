@@ -1,8 +1,8 @@
 <template>
-    <v-container class="bg-white" fluid>
+    <v-container class="">
         <v-row dense>
             <v-col cols="12" lg="6">
-                <v-card color="white" class="pt-4" elevation="1">
+                <v-card class="pt-4" elevation="1">
                     <template #prepend>
                         <v-icon color="red">mdi-thermometer</v-icon>
                     </template>
@@ -18,7 +18,7 @@
                 </v-card>
             </v-col>
             <v-col cols="12" lg="6">
-                <v-card color="white" class="pt-4" elevation="1">
+                <v-card class="pt-4" elevation="1">
                     <template #prepend>
                         <v-icon color="blue">mdi-water-outline</v-icon>
                     </template>

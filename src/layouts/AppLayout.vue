@@ -23,7 +23,7 @@
             grow 
             fixed 
             mode="shift" 
-            class="bg-white position-fixed bottom-0 left-0" 
+            class="position-fixed bottom-0 left-0" 
         >
             <v-btn to="/app/home" value="home">
                 <v-icon>mdi-home</v-icon>
@@ -40,6 +40,10 @@
             <v-btn to="/app/growth" value="growth">
                 <v-icon>mdi-sprout</v-icon>
                 <span>Growth</span>
+            </v-btn>
+            <v-btn to="/app/settings" value="settings">
+                <v-icon>mdi-cog</v-icon>
+                <span>Settings</span>
             </v-btn>
         </v-bottom-navigation>
     </v-layout>

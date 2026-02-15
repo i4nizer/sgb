@@ -1,5 +1,5 @@
 <template>
-	<v-app class="bg-white">
+	<v-app>
 		<router-view #="{ Component, route }">
 			<AppLayout v-if="route.meta?.layout === `app`">
 				<component :is="Component"></component>

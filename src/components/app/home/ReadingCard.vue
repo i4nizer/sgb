@@ -1,5 +1,5 @@
 <template>
-    <v-card color="white" class="pt-4" elevation="1">
+    <v-card class="pt-4" elevation="1">
         <template #append>
             <v-icon :color="props['icon:color']">{{ icon }}</v-icon>
         </template>

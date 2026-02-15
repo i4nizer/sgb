@@ -3,6 +3,7 @@ import HomeView from "@/views/app/HomeView.vue"
 import MonitorView from "@/views/app/MonitorView.vue"
 import ScanView from "@/views/app/ScanView.vue"
 import GrowthView from "@/views/app/GrowthView.vue"
+import SettingsView from "@/views/app/SettingsView.vue"
 
 //
 
@@ -41,6 +42,12 @@ const routes: RouteRecordRaw[] = [
                 name: "growth",
                 meta: { layout: "app" },
                 component: GrowthView,
+            },
+            {
+                path: "settings",
+                name: "settings",
+                meta: { layout: "app" },
+                component: SettingsView,
             },
         ],
     },

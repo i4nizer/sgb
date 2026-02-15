@@ -1,5 +1,5 @@
 <template>
-    <v-container class="bg-white">
+    <v-container class="">
         <v-row dense>
             <v-col cols="12">
                 <Transition>

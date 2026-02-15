@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    ImageBoundingBoxRenderer: typeof import('./src/components/app/scan/ImageBoundingBoxRenderer.vue')['default']
     ReadingCard: typeof import('./src/components/app/home/ReadingCard.vue')['default']
     ReadingChart: typeof import('./src/components/app/monitor/ReadingChart.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
