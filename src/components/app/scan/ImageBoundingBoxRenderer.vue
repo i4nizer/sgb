@@ -36,6 +36,7 @@ let app: PIXI.Application<PIXI.Renderer> | undefined = undefined
 let sprite: PIXI.Sprite | undefined = undefined
 let texture: PIXI.Texture | undefined = undefined
 let graphics: PIXI.Graphics[] = []
+let labels: PIXI.Text[] = []
 
 //
 
@@ -57,7 +58,7 @@ const init = async () => {
 
 const clean = async () => {
 	observer?.disconnect()
-	await dispose(graphics)
+	await dispose(graphics, labels)
 	app?.destroy(true, { children: true })
 }
 
@@ -90,11 +91,12 @@ const draw = async () => {
 
 const render = async () => {
 	if (!app || !texture || !texture.source || !props.src) return
-	await dispose(graphics)
+	await dispose(graphics, labels)
 	graphics = []
+	labels = []
 	
 	if (!props.detections) return await props.onRender?.(app.canvas)
-	for (const { box } of props.detections) {
+	for (const { box, class: label, confidence } of props.detections) {
 		const x = box.x * size.width
 		const y = box.y * size.height
 		const w = box.w * size.width
@@ -106,15 +108,48 @@ const render = async () => {
 
 		app.stage.addChild(g)
 		graphics.push(g)
+
+		const text = new PIXI.Text({
+			text: `${label} ${(confidence * 100).toFixed(0)}%`,
+			style: {
+				fontSize: 11,
+				fill: 0xffffff,
+				fontWeight: 'bold',
+			}
+		})
+		
+		const padding = 2
+		const labelWidth = text.width + padding * 2
+		const labelHeight = text.height + padding * 2
+		
+		const bgX = x
+		const bgY = y - labelHeight
+		
+		const bg = new PIXI.Graphics()
+		bg.rect(bgX, bgY, labelWidth, labelHeight)
+		bg.fill({ color: 0xff0000, alpha: 0.7 })
+		
+		text.x = bgX + padding
+		text.y = bgY + padding
+		
+		app.stage.addChild(bg)
+		app.stage.addChild(text)
+		graphics.push(bg)
+		labels.push(text)
 	}
 
 	await props.onRender?.(app.canvas)
 }
 
-const dispose = async (graphics: PIXI.Graphics[]) => {
+const dispose = async (graphics: PIXI.Graphics[], labels: PIXI.Text[]) => {
 	for (const g of graphics) {
 		app?.stage.removeChild(g)
 		g.destroy()
+	}
+
+	for (const label of labels) {
+		app?.stage.removeChild(label)
+		label.destroy()
 	}
 }
 
