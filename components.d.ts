@@ -11,12 +11,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    ImageBoundingBoxRenderer: typeof import('./src/components/app/scan/ImageBoundingBoxRenderer.vue')['default']
+    ImageBoundingBoxRenderer: typeof import('./src/components/app/growth/ImageBoundingBoxRenderer.vue')['default']
     ReadingCard: typeof import('./src/components/app/home/ReadingCard.vue')['default']
     ReadingChart: typeof import('./src/components/app/monitor/ReadingChart.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SignInForm: typeof import('./src/components/auth/SignInForm.vue')['default']
     SignUpForm: typeof import('./src/components/auth/SignUpForm.vue')['default']
+    VideoBoundingBoxRenderer: typeof import('./src/components/app/growth/VideoBoundingBoxRenderer.vue')['default']
   }
 }
