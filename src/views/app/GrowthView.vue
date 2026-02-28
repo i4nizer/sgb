@@ -25,6 +25,7 @@
                             :src="stream"
                             :freeze="freezeScanning"
                             :detections="[]"
+                            @freeze="onFreezeCapture"
                         ></VideoBoundingBoxRenderer>
                     </v-responsive>
                 </v-card-text>
@@ -79,6 +80,7 @@
 <script setup lang="ts">
 import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
 import useCamera from '@/composables/use-camera';
+import useFileSave from '@/composables/use-file-save';
 import { nextTick, onMounted, ref } from 'vue';
 
 //
@@ -108,6 +110,7 @@ const onSwitchCamera = async () => {
 //
 
 // --- Scan Dialog
+const fileSaveCmp = useFileSave()
 const freezeScanning = ref(false)
 const showScanDialog = ref(false)
 
@@ -119,6 +122,12 @@ const onCloseDialog = async () => {
 const onClickCapture = async () => {
     freezeScanning.value = true
     await nextTick()
+}
+
+const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
+    const dataUrl = canvas.toDataURL("image/jpeg", 1)
+    const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1]! : dataUrl
+    await fileSaveCmp.saveFile(base64, "image/jpeg", `sgb-capture-${Date.now()}.jpeg`)
     freezeScanning.value = false
 }
 
