@@ -56,6 +56,7 @@ const init = async () => {
 		height: size.height,
 		backgroundAlpha: 0,
 		antialias: true,
+		preserveDrawingBuffer: true,
 	})
 
 	if (!divElement.value) return
@@ -88,7 +89,9 @@ const render = async () => {
 	await dispose(graphics)
 	graphics = []
 
+	if (!props.detections) occupied = false
 	if (!props.detections) return await props.onRender?.(app.canvas)
+
 	for (const { box } of props.detections) {
 		const x = box.x * size.width
 		const y = box.y * size.height
