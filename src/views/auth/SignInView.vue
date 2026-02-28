@@ -27,10 +27,12 @@ import type { UserSignInSchema } from '@/schemas/UserSchema';
 import type { SubmissionContext } from 'vee-validate';
 import { useRouter } from 'vue-router';
 import SignInForm from '@/components/auth/SignInForm.vue';
+import useToast from '@/composables/use-toast';
 
 //
 
-// --- Global Utilities
+// --- Utils
+const toast = useToast()
 const router = useRouter()
 
 //
@@ -40,6 +42,7 @@ const onSubmitSignIn = async (
     ctx: SubmissionContext<{ [K in keyof UserSignInSchema]?: unknown }>
 ) => {
     await router.push("/app/home")
+    toast.success("User signed-in successfully.")
 }
 
 //

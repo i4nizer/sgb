@@ -111,10 +111,14 @@ import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRe
 import useCamera from '@/composables/use-camera';
 import useCldDetection from '@/composables/use-cld-detection';
 import useFileSave from '@/composables/use-file-save';
+import useToast from '@/composables/use-toast';
 import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
 import { nextTick, onMounted, ref } from 'vue';
 
 //
+
+// --- Utils
+const toast = useToast()
 
 // --- Camera
 const cameraCmp = useCamera()
@@ -163,6 +167,7 @@ const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
     if (freezePurpose.value != "Capture") return
     const dataUrl = canvas.toDataURL("image/jpeg", 1)
     const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1]! : dataUrl
+    toast.success("Image captured successfully.")
     await fileSaveCmp.saveFile(base64, "image/jpeg", `sgb-capture-${Date.now()}.jpeg`)
     freezeScanning.value = freezePurpose.value == "Capture" ? false : freezeScanning.value
 }
@@ -177,28 +182,34 @@ const onClickPauseFrame = async () => {
 // --- CLD Detection
 const cldDetectionCmp = useCldDetection()
 const detections = ref<DetectionRawSchema[]>([])
-const showDetectionBBox = ref(false)
+const showDetectionBBox = ref(true)
 const cldDetectorLoading = ref(false)
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
     if (!showDetectionBBox.value) return
-    detections.value = await cldDetectionCmp.predict(canvas, 0.9, 0.25, 100)
+    await cldDetectionCmp.predict(canvas, 0.9, 0.25, 100)
+        .then((res) => detections.value = res)
+        .catch(() => toast.error("AI model detection errored."))
 }
 
 //
 
 const onMountedCb = async () => {
+    toast.warn("Camera is loading please wait.")
     cameraLoading.value = true
     await cameraCmp.list()
     cameraLoading.value = false
-
+    toast.success("Camera loaded successfully.")
+    
     const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
     const [url, imgsz, classes] = [VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES]
-
+    
+    toast.warn("AI model is loading please wait.")
     cldDetectorLoading.value = true
     await cldDetectionCmp.load(url, Number(imgsz), classes.split(", "))
     await cldDetectionCmp.warmup()
     cldDetectorLoading.value = false
+    toast.success("AI model loaded successfully.")
 }
 
 onMounted(onMountedCb)

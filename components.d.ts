@@ -18,6 +18,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SignInForm: typeof import('./src/components/auth/SignInForm.vue')['default']
     SignUpForm: typeof import('./src/components/auth/SignUpForm.vue')['default']
+    ToastQueue: typeof import('./src/components/ToastQueue.vue')['default']
     VideoBoundingBoxRenderer: typeof import('./src/components/app/growth/VideoBoundingBoxRenderer.vue')['default']
   }
 }

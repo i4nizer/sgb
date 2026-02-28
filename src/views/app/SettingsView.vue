@@ -11,6 +11,7 @@
                                 inset
                                 hide-details
                                 color="accent"
+                                v-model="themeFlag"
                                 @update:model-value="onChangeTheme"
                             ></v-switch>
                         </div>
@@ -22,30 +23,20 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useTheme } from 'vuetify';
 
 //
 
 // --- Theme
 const theme = useTheme()
-const themeType = ref("light")
+const themeFlag = ref(localStorage.getItem("theme") == "dark")
 
 const onChangeTheme = (v: unknown) => {
     const value = !!v ? "dark" : "light"
     theme.change(value)
     localStorage.setItem("theme", value)
 }
-
-//
-
-const onMountedCallback = async () => {
-    const savedTheme = localStorage.getItem("theme") ?? "system"
-    theme.change(savedTheme)
-    themeType.value = savedTheme
-}
-
-onMounted(onMountedCallback)
 
 //
 
