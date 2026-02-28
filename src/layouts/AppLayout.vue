@@ -2,7 +2,7 @@
     <v-layout>
         <v-app-bar
             flat
-            color="green-darken-4"
+            color="accent"
             class="px-5"
             elevation="6"
         >
@@ -12,7 +12,7 @@
             <v-app-bar-title>
                 <div class="d-flex flex-column ga-0">
                     <span>Smart Germination Box</span>
-                    <small class="text-grey text-subtitle-2">IoT Coffee Nursery</small>
+                    <small class="text-grey-lighten-1 text-subtitle-2">IoT Coffee Nursery</small>
                 </div>
             </v-app-bar-title>
         </v-app-bar>
@@ -23,6 +23,7 @@
             grow 
             fixed 
             mode="shift" 
+            color="accent"
             class="position-fixed bottom-0 left-0" 
         >
             <v-btn to="/app/home" value="home">

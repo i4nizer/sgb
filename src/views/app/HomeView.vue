@@ -3,7 +3,7 @@
         <v-row dense>
             <v-col cols="12">
                 <Transition>
-                    <v-card v-if="showWelcomeNotif" color="green" elevation="1">
+                    <v-card v-if="showWelcomeNotif" color="accent" elevation="1">
                         <template #prepend>
                             <v-icon>mdi-pulse</v-icon>
                         </template>
@@ -23,7 +23,7 @@
                     title="Temperature"
                     status="Optimal"
                     icon:color="red"
-                    status:color="green"
+                    status:color="accent"
                     :value="26.5"
                 ></ReadingCard>
             </v-col>
@@ -34,7 +34,7 @@
                     title="Humidity"
                     status="Good"
                     icon:color="blue"
-                    status:color="green"
+                    status:color="accent"
                     :value="26.5"
                 ></ReadingCard>
             </v-col>
@@ -44,8 +44,8 @@
                     unit="%"
                     title="Soil Moisture"
                     status="Normal"
-                    icon:color="green"
-                    status:color="green"
+                    icon:color="accent"
+                    status:color="accent"
                     :value="58"
                 ></ReadingCard>
             </v-col>

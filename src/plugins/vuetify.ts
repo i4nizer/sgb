@@ -1,21 +1,33 @@
-/**
- * plugins/vuetify.ts
- *
- * Framework documentation: https://vuetifyjs.com`
- */
-
-// Styles
 import "@mdi/font/css/materialdesignicons.css"
 import "vuetify/styles"
-
-// Composables
 import { createVuetify } from "vuetify"
 import { VDateInput } from "vuetify/labs/VDateInput"
 import { VFileUpload } from "vuetify/labs/VFileUpload"
 
-// https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
+//
+
 export default createVuetify({
-	theme: { defaultTheme: "system" },
+	theme: {
+		defaultTheme: "light",
+		themes: {
+			light: {
+				dark: false,
+				colors: {
+					accent: "#4a8c6f",
+					primary: "#f9faf9",
+					secondary: "#e4ece8",
+				},
+			},
+			dark: {
+				dark: true,
+				colors: {
+					accent: "#5aab87",
+					primary: "#181a19",
+					secondary: "#252a27",
+				},
+			},
+		},
+	},
 	components: { VDateInput, VFileUpload },
 	defaults: {
 		VBtn: {

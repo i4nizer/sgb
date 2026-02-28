@@ -28,12 +28,10 @@
 		<v-btn 
 			type="submit" 
 			color="accent" 
-			class="w-75 my-2 text-white" 
+			class="w-75 my-2" 
 			:disabled
 			:loading="isSubmitting"
-		>
-			<span class="text-white">Sign Up</span>
-		</v-btn>
+		>Sign Up</v-btn>
 	</v-form>
 </template>
 
