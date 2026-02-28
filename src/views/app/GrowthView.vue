@@ -85,6 +85,7 @@
             class="position-fixed bottom-0 right-0 mb-16 mr-5"
             location="right bottom"
             transition="fade"
+            :loading="cameraLoading || cldDetectorLoading"
         >
             <v-icon>mdi-scan-helper</v-icon>
             <v-speed-dial activator="parent">
@@ -119,6 +120,7 @@ import { nextTick, onMounted, ref } from 'vue';
 const cameraCmp = useCamera()
 const { stream, cameras } = cameraCmp
 const cameraIndex = ref(0)
+const cameraLoading = ref(false)
 
 const onClickImage = async () => {
 
@@ -176,6 +178,7 @@ const onClickPauseFrame = async () => {
 const cldDetectionCmp = useCldDetection()
 const detections = ref<DetectionRawSchema[]>([])
 const showDetectionBBox = ref(false)
+const cldDetectorLoading = ref(false)
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
     if (!showDetectionBBox.value) return
@@ -185,12 +188,17 @@ const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
 //
 
 const onMountedCb = async () => {
+    cameraLoading.value = true
     await cameraCmp.list()
+    cameraLoading.value = false
 
     const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
     const [url, imgsz, classes] = [VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES]
+
+    cldDetectorLoading.value = true
     await cldDetectionCmp.load(url, Number(imgsz), classes.split(", "))
     await cldDetectionCmp.warmup()
+    cldDetectorLoading.value = false
 }
 
 onMounted(onMountedCb)

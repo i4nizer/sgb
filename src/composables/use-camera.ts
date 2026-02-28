@@ -68,7 +68,8 @@ export default () => {
 
     return { 
         stream, 
-        cameras, 
+        cameras,
+        permitted,
         list, 
         begin, 
         terminate, 
