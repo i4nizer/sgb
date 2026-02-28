@@ -1,6 +1,6 @@
 <template>
     <v-container fluid class="fill-height">
-        <v-row>
+        <v-row dense justify="center">
             <v-col cols="12" md="6" lg="4" xl="3" xxl="2">
                 <v-card>
                     <v-card-title>Sign In</v-card-title>
