@@ -1,5 +1,8 @@
 <template>
-	<div ref="divElement">
+	<div 
+		ref="divElement" 
+		:style="{ transform: `scaleX(${invertX ? -1 : 1}) scaleY(${invertY ? -1 : 1})` }"
+	>
 		<video
 			ref="videoElement"
 			autoplay
@@ -15,17 +18,19 @@
 <script setup lang="ts">
 import type { DetectionSchema } from "@/schemas/DetectionSchema"
 import * as PIXI from "pixi.js"
-import { watch } from "vue"
-import { onMounted, onUnmounted, reactive, ref } from "vue"
+import { onMounted, onUnmounted, reactive, watch, ref } from "vue"
 
 //
 
 const props = defineProps<{
 	src?: MediaProvider
 	freeze?: boolean
+	invertX?: boolean
+	invertY?: boolean
 	detections: DetectionSchema[]
 	onFrame?: (canvas: HTMLCanvasElement) => any
 	onRender?: (canvas: HTMLCanvasElement) => any
+	onFreeze?: (canvas: HTMLCanvasElement) => any
 }>()
 
 //
@@ -62,9 +67,16 @@ const init = async () => {
 
 const clean = async () => {
 	observer?.disconnect()
-	if (app) app?.ticker?.destroy()
-	await dispose(graphics)
-	if (app) app?.destroy(true, { children: true })
+	if (!app) return
+
+	app.ticker.stop()
+    app.ticker.remove(render)
+    await dispose(graphics)
+	app.destroy(true, { children: true, texture: true })
+
+	sprite = undefined
+	texture = undefined
+	graphics = []
 }
 
 const render = async () => {
@@ -72,7 +84,6 @@ const render = async () => {
 	if (!app || occupied || !ready || !props.src || !texture || !texture.source) return
 
 	occupied = true
-	// texture.update()
 	await props.onFrame?.(app.canvas)
 	await dispose(graphics)
 	graphics = []
@@ -97,7 +108,21 @@ const render = async () => {
 }
 
 const freeze = async () => {
+	if (!app || !videoElement.value) return
 
+	app.ticker.stop()
+	app.ticker.remove(render)
+	videoElement.value.pause()
+
+	await props.onFreeze?.(app.canvas)
+}
+
+const unfreeze = async () => {
+	if (!app || !videoElement.value) return
+
+	await videoElement.value.play()
+	app.ticker.add(render)
+	app.ticker.start()
 }
 
 const restart = async () => {
@@ -106,8 +131,15 @@ const restart = async () => {
 	app.ticker.remove(render)
 	app.stage.removeChildren()
 
+	sprite?.destroy(true)
+	sprite = undefined
+	texture?.destroy(true)
+	texture = undefined
+
 	if (!props.src || !videoElement.value) return
+	videoElement.value.pause()
 	videoElement.value.srcObject = props.src
+	await new Promise(res => videoElement.value!.onloadedmetadata = res)
 	await videoElement.value.play()
 
 	texture = PIXI.Texture.from(videoElement.value)
@@ -116,15 +148,13 @@ const restart = async () => {
 	sprite.height = app.screen.height
 
 	app.stage.addChild(sprite)
-	app.ticker.add(render)
+	app.ticker.add(() => render().catch(console.error))
 	app.ticker.start()
 }
 
 const dispose = async (graphics: PIXI.Graphics[]) => {
-	for (const g of graphics) {
-		app?.stage.removeChild(g)
-		g.destroy()
-	}
+	for (const g of graphics) app?.stage.removeChild(g)
+	for (const g of graphics) g.destroy()
 }
 
 //
@@ -140,6 +170,7 @@ const onResize = async () => {
 //
 
 watch(() => props.src, restart, { immediate: true })
+watch(() => props.freeze, (nv) => nv ? freeze() : unfreeze())
 
 //
 
