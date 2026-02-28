@@ -12,6 +12,8 @@ export default () => {
     //
     
     const list = async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        stream.getTracks().forEach(track => track.stop())
         const devices = await navigator.mediaDevices.enumerateDevices()
         cameras.value = devices.filter(device => device.kind === "videoinput")
         return cameras.value
