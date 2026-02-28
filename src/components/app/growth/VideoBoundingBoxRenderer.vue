@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DetectionSchema } from "@/schemas/DetectionSchema"
+import type { DetectionRawSchema } from "@/schemas/DetectionSchema"
 import * as PIXI from "pixi.js"
 import { onMounted, onUnmounted, reactive, watch, ref } from "vue"
 
@@ -27,7 +27,7 @@ const props = defineProps<{
 	freeze?: boolean
 	invertX?: boolean
 	invertY?: boolean
-	detections: DetectionSchema[]
+	detections: DetectionRawSchema[]
 	onFrame?: (canvas: HTMLCanvasElement) => any
 	onRender?: (canvas: HTMLCanvasElement) => any
 	onFreeze?: (canvas: HTMLCanvasElement) => any
@@ -44,6 +44,7 @@ const size = reactive({ width: 640, height: 640 })
 let app: PIXI.Application<PIXI.Renderer> | undefined = undefined
 let sprite: PIXI.Sprite | undefined = undefined
 let texture: PIXI.Texture | undefined = undefined
+let labels: PIXI.Text[] = []
 let graphics: PIXI.Graphics[] = []
 let occupied = false
 
@@ -72,7 +73,7 @@ const clean = async () => {
 
 	app.ticker.stop()
     app.ticker.remove(render)
-    await dispose(graphics)
+    await dispose(graphics, labels)
 	app.destroy(true, { children: true, texture: true })
 
 	sprite = undefined
@@ -86,13 +87,13 @@ const render = async () => {
 
 	occupied = true
 	await props.onFrame?.(app.canvas)
-	await dispose(graphics)
+	await dispose(graphics, labels)
 	graphics = []
 
-	if (!props.detections) occupied = false
-	if (!props.detections) return await props.onRender?.(app.canvas)
+	if (props.detections.length <= 0) occupied = false
+	if (props.detections.length <= 0) return await props.onRender?.(app.canvas)
 
-	for (const { box } of props.detections) {
+	for (const { box, class: label, confidence } of props.detections) {
 		const x = box.x * size.width
 		const y = box.y * size.height
 		const w = box.w * size.width
@@ -100,7 +101,29 @@ const render = async () => {
 
 		const g = new PIXI.Graphics()
 		g.rect(x, y, w, h)
-		g.stroke({ width: 2, color: 0xff0000, alpha: 1 })
+		g.stroke({ width: 2, color: 0x4a8c6f, alpha: 1 })
+
+		const style: PIXI.CanvasTextOptions["style"] = { fontSize: 11, fill: 0xffffff, fontWeight: 'bold' }
+		const text = new PIXI.Text({ text: `${label} ${(confidence * 100).toFixed(0)}%`, style })
+		
+		const padding = 2
+		const labelWidth = text.width + padding * 2
+		const labelHeight = text.height + padding * 2
+		
+		const bgX = x
+		const bgY = y - labelHeight
+		
+		const bg = new PIXI.Graphics()
+		bg.rect(bgX, bgY, labelWidth, labelHeight)
+		bg.fill({ color: 0x4a8c6f, alpha: 0.7 })
+		
+		text.x = bgX + padding
+		text.y = bgY + padding
+		
+		app.stage.addChild(bg)
+		app.stage.addChild(text)
+		graphics.push(bg)
+		labels.push(text)
 
 		app.stage.addChild(g)
 		graphics.push(g)
@@ -155,9 +178,9 @@ const restart = async () => {
 	app.ticker.start()
 }
 
-const dispose = async (graphics: PIXI.Graphics[]) => {
-	for (const g of graphics) app?.stage.removeChild(g)
-	for (const g of graphics) g.destroy()
+const dispose = async (graphics: PIXI.Graphics[], labels: PIXI.Text[]) => {
+	graphics.forEach(g => [app?.stage.removeChild(g), g.destroy()])
+	labels.forEach(l => [app?.stage.removeChild(l), l.destroy()])
 }
 
 //

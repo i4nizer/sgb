@@ -19,8 +19,8 @@ export default () => {
         labels?: string[],
     ) => {
         await tf.ready()
-        size.value ??= imgsz || 256
-        classes.value ??= labels || []
+        size.value = imgsz || 256
+        classes.value = labels || []
         model.value = await tf.loadGraphModel(url)
         return toRaw(model.value)
     }

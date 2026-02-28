@@ -18,28 +18,56 @@
             <v-card>
                 <v-card-text class="pb-0">
                     <v-responsive class="w-100" :aspect-ratio="1">
-                        <h4 class="mb-2 text-center text-accent font-weight-bold">Scan Coffee Leaf</h4>
+                        <div class="d-flex align-center justify-space-between">
+                            <h4 class="text-center text-accent font-weight-bold">Scan Coffee Leaf</h4>
+                            <v-menu open-on-hover>
+                                <template #activator="{ props }">
+                                    <v-btn
+                                        size="x-small"
+                                        icon="mdi-dots-vertical"
+                                        class="text-grey"
+                                        :="props"
+                                    ></v-btn>
+                                </template>
+                                <template #default>
+                                    <v-list density="compact">
+                                        <v-list-item 
+                                            title="Switch Camera"
+                                            prepend-icon="mdi-camera-switch"
+                                            @click="onSwitchCamera"
+                                        ></v-list-item>
+                                        <v-list-item
+                                            title="Toggle Bounding Box"
+                                            prepend-icon="mdi-selection"
+                                            :class="showDetectionBBox ? `text-accent` : `text-black`"
+                                            @click="showDetectionBBox = !showDetectionBBox"
+                                        ></v-list-item>
+                                    </v-list>
+                                </template>
+                            </v-menu>
+                        </div>
                         <VideoBoundingBoxRenderer
-                            invert-x
-                            class="border rounded overflow-hidden d-flex align-center justify-center"
+                            class="mt-1 border rounded overflow-hidden d-flex align-center justify-center"
                             :src="stream"
                             :freeze="freezeScanning"
-                            :detections="[]"
+                            :detections="detections"
+                            @frame="onDrawCameraFrame"
                             @freeze="onFreezeCapture"
                         ></VideoBoundingBoxRenderer>
                     </v-responsive>
                 </v-card-text>
                 <v-card-actions>
                     <v-btn
-                        icon="mdi-camera-switch"
-                        color="grey"
-                        @click="onSwitchCamera"
+                        size="small"
+                        color="accent"
+                        :icon="freezeScanning ? `mdi-play` : `mdi-pause`"
+                        @click="onClickPauseFrame"
                     ></v-btn>
                     <v-spacer></v-spacer>
                     <v-btn
                         text="Capture"
                         color="accent"
-                        :loading="freezeScanning"
+                        :loading="freezeScanning && freezePurpose == `Capture`"
                         @click="onClickCapture"
                     ></v-btn>
                     <v-btn
@@ -82,6 +110,7 @@ import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRe
 import useCamera from '@/composables/use-camera';
 import useCldDetection from '@/composables/use-cld-detection';
 import useFileSave from '@/composables/use-file-save';
+import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
 import { nextTick, onMounted, ref } from 'vue';
 
 //
@@ -112,8 +141,9 @@ const onSwitchCamera = async () => {
 
 // --- Scan Dialog
 const fileSaveCmp = useFileSave()
-const freezeScanning = ref(false)
 const showScanDialog = ref(false)
+const freezePurpose = ref<"None" | "Pause" | "Capture">("None")
+const freezeScanning = ref(false)
 
 const onCloseDialog = async () => {
     freezeScanning.value = false
@@ -121,23 +151,36 @@ const onCloseDialog = async () => {
 }
 
 const onClickCapture = async () => {
-    freezeScanning.value = true
+    freezeScanning.value = false
+    freezePurpose.value = "Capture"
     await nextTick()
+    freezeScanning.value = true
 }
 
 const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
+    if (freezePurpose.value != "Capture") return
     const dataUrl = canvas.toDataURL("image/jpeg", 1)
     const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1]! : dataUrl
     await fileSaveCmp.saveFile(base64, "image/jpeg", `sgb-capture-${Date.now()}.jpeg`)
-    freezeScanning.value = false
+    freezeScanning.value = freezePurpose.value == "Capture" ? false : freezeScanning.value
+}
+
+const onClickPauseFrame = async () => {
+    freezePurpose.value = "Pause"
+    freezeScanning.value = !freezeScanning.value
 }
 
 //
 
 // --- CLD Detection
 const cldDetectionCmp = useCldDetection()
+const detections = ref<DetectionRawSchema[]>([])
+const showDetectionBBox = ref(false)
 
-
+const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
+    if (!showDetectionBBox.value) return
+    detections.value = await cldDetectionCmp.predict(canvas, 0.9, 0.25, 100)
+}
 
 //
 
@@ -147,6 +190,7 @@ const onMountedCb = async () => {
     const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
     const [url, imgsz, classes] = [VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES]
     await cldDetectionCmp.load(url, Number(imgsz), classes.split(", "))
+    await cldDetectionCmp.warmup()
 }
 
 onMounted(onMountedCb)
