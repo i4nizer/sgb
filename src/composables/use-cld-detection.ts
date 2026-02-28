@@ -47,6 +47,12 @@ export default () => {
         return bboxes
     }
 
+    const backend = async () => {
+        await tf.ready()
+        return tf.getBackend()
+    }
+
+
     /** Resizes and normalizes an image. */
     const preprocess = (img: Parameters<typeof tf.browser.fromPixels>[0]) => {
         return tf.tidy(() =>
@@ -145,6 +151,7 @@ export default () => {
         load,
         warmup,
         predict,
+        backend,
         preprocess,
         nms,
         extract,

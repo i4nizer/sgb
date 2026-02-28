@@ -86,6 +86,7 @@
             location="right bottom"
             transition="fade"
             :loading="cameraLoading || cldDetectorLoading"
+            :disabled="cameraLoading || cldDetectorLoading"
         >
             <v-icon>mdi-scan-helper</v-icon>
             <v-speed-dial activator="parent">
@@ -196,20 +197,32 @@ const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
 
 const onMountedCb = async () => {
     toast.warn("Camera is loading please wait.")
+    await nextTick()
+
     cameraLoading.value = true
     await cameraCmp.list()
     cameraLoading.value = false
+
     toast.success("Camera loaded successfully.")
+    await nextTick()
     
     const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
     const [url, imgsz, classes] = [VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES]
     
     toast.warn("AI model is loading please wait.")
+    await nextTick()
+    
     cldDetectorLoading.value = true
     await cldDetectionCmp.load(url, Number(imgsz), classes.split(", "))
     await cldDetectionCmp.warmup()
     cldDetectorLoading.value = false
+    
     toast.success("AI model loaded successfully.")
+    await nextTick()
+
+    const backend = await cldDetectionCmp.backend()
+    const isGpu = backend.toLowerCase().includes("webgl")
+    toast.show(`AI model is ${isGpu ? "" : "not"} gpu accelerated, uses ${backend}.`, isGpu ? "accent" : "warning")
 }
 
 onMounted(onMountedCb)
