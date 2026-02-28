@@ -5,19 +5,14 @@
                 <v-card>
                     <v-card-text>
                         <div class="w-100 d-flex align-center justify-space-between">
-                            <div class="font-weight-bold">Theme</div>
+                            <div class="font-weight-bold">Dark Mode</div>
                             <v-spacer></v-spacer>
-                            <v-radio-group 
-                                inline 
+                            <v-switch
+                                inset
                                 hide-details
-                                class="w-0 d-flex justify-end"
-                                v-model="themeType"
+                                color="accent"
                                 @update:model-value="onChangeTheme"
-                            >
-                                <v-radio label="Light" value="light"></v-radio>
-                                <v-radio label="Dark" value="dark"></v-radio>
-                                <v-radio label="System" value="system"></v-radio>
-                            </v-radio-group>
+                            ></v-switch>
                         </div>
                     </v-card-text>
                 </v-card>
@@ -37,7 +32,7 @@ const theme = useTheme()
 const themeType = ref("light")
 
 const onChangeTheme = (v: unknown) => {
-    const value = v as string
+    const value = !!v ? "dark" : "light"
     theme.change(value)
     localStorage.setItem("theme", value)
 }
