@@ -34,10 +34,6 @@
                 <v-icon>mdi-chart-bar</v-icon>
                 <span>Monitor</span>
             </v-btn>
-            <v-btn to="/app/scan" value="scan">
-                <v-icon>mdi-camera</v-icon>
-                <span>Scan</span>
-            </v-btn>
             <v-btn to="/app/growth" value="growth">
                 <v-icon>mdi-sprout</v-icon>
                 <span>Growth</span>

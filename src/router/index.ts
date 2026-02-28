@@ -2,7 +2,6 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
 import SignInView from "@/views/auth/SignInView.vue"
 import HomeView from "@/views/app/HomeView.vue"
 import MonitorView from "@/views/app/MonitorView.vue"
-import ScanView from "@/views/app/ScanView.vue"
 import GrowthView from "@/views/app/GrowthView.vue"
 import SettingsView from "@/views/app/SettingsView.vue"
 
@@ -32,12 +31,6 @@ const routes: RouteRecordRaw[] = [
         name: "monitor",
         meta: { layout: "app" },
         component: MonitorView,
-    },
-    {
-        path: "/app/scan",
-        name: "scan",
-        meta: { layout: "app" },
-        component: ScanView,
     },
     {
         path: "/app/growth",
