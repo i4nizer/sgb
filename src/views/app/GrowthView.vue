@@ -80,6 +80,7 @@
 <script setup lang="ts">
 import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
 import useCamera from '@/composables/use-camera';
+import useCldDetection from '@/composables/use-cld-detection';
 import useFileSave from '@/composables/use-file-save';
 import { nextTick, onMounted, ref } from 'vue';
 
@@ -133,8 +134,19 @@ const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
 
 //
 
+// --- CLD Detection
+const cldDetectionCmp = useCldDetection()
+
+
+
+//
+
 const onMountedCb = async () => {
     await cameraCmp.list()
+
+    const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
+    const [url, imgsz, classes] = [VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES]
+    await cldDetectionCmp.load(url, Number(imgsz), classes.split(", "))
 }
 
 onMounted(onMountedCb)

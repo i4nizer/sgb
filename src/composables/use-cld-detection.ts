@@ -7,21 +7,21 @@ export default () => {
 
     //
 
-    const size = ref(Number(import.meta.env.AI_CLD_IMGSZ))
+    const size = ref(256)
     const model = ref<tf.GraphModel>()
-    const classes = ref(import.meta.env.AI_CLD_CLASSES.split(", "))
+    const classes = ref<string[]>([])
 
     //
 
     const load = async (
-        url = import.meta.env.AI_CLD_URL,
-        imgsz = Number(import.meta.env.AI_CLD_IMGSZ),
-        labels = import.meta.env.AI_CLD_CLASSES.split(", "),
+        url: string,
+        imgsz?: number,
+        labels?: string[],
     ) => {
         await tf.ready()
-        size.value = imgsz
+        size.value ??= imgsz || 256
+        classes.value ??= labels || []
         model.value = await tf.loadGraphModel(url)
-        classes.value = labels
         return toRaw(model.value)
     }
 
