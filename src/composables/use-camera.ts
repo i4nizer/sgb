@@ -1,3 +1,5 @@
+import { Camera } from "@capacitor/camera"
+import { Capacitor } from "@capacitor/core"
 import { ref } from "vue"
 
 //
@@ -8,12 +10,12 @@ export default () => {
 
     const stream = ref<MediaStream>()
     const cameras = ref<MediaDeviceInfo[]>([])
+    const permitted = ref(false)
 
     //
     
     const list = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        stream.getTracks().forEach(track => track.stop())
+        await requestPerm()
         const devices = await navigator.mediaDevices.enumerateDevices()
         cameras.value = devices.filter(device => device.kind === "videoinput")
         return cameras.value
@@ -40,5 +42,38 @@ export default () => {
         stream.value = undefined
     }
 
-    return { stream, cameras, list, begin, terminate }
+    const requestPerm = async () => {
+        if (!Capacitor.isNativePlatform()) return await requestPermWeb().then(() => permitted.value = true)
+        return await requestPermNative().then(() => permitted.value = true)
+    }
+
+    const requestPermWeb = async () => {
+        return await navigator.mediaDevices
+            .getUserMedia({ video: true, audio: false })
+            .then((res) => res.getTracks().forEach(track => track.stop()))
+            .then(() => permitted.value = true)
+    }
+
+    const requestPermNative = async () => {
+        const status = await Camera.checkPermissions()
+        if (status.camera == "granted") return permitted.value = true
+        if (status.camera == "denied") throw new Error("Camera permission denied.")
+        
+        return await Camera
+            .requestPermissions({ permissions: ["camera"] })
+            .then(() => permitted.value = true)
+    }
+
+    //
+
+    return { 
+        stream, 
+        cameras, 
+        list, 
+        begin, 
+        terminate, 
+        requestPerm, 
+        requestPermWeb, 
+        requestPermNative,
+    }
 }
