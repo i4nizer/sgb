@@ -55,13 +55,12 @@ export default () => {
     }
 
     const requestPermNative = async () => {
-        const status = await Camera.checkPermissions()
-        if (status.camera == "granted") return permitted.value = true
-        if (status.camera == "denied") throw new Error("Camera permission denied.")
-        
-        return await Camera
-            .requestPermissions({ permissions: ["camera"] })
-            .then(() => permitted.value = true)
+        let status = await Camera.checkPermissions()
+        if (status.camera == "granted") return await requestPermWeb()
+            
+        status = await Camera.requestPermissions({ permissions: ["camera"] });
+        if (status.camera == "granted") return await requestPermWeb()
+        throw new Error("Camera permission denied.")
     }
 
     //
