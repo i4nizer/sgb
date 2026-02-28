@@ -34,7 +34,7 @@ export default () => {
 
     /** Runs preprocessing, prediction, and postprocessing to get bboxes. */
     const predict = async (img: any, minIoU = 0.7, minScore = 0.5, maxBoxCount = 100) => {
-        if (!model.value) return
+        if (!model.value) throw new Error("CLD model not found.")
 
         const prediction = tf.tidy(() => {
             const imgTensor = preprocess(img)
@@ -100,8 +100,8 @@ export default () => {
                 h: boxes[i][3] / size.value,
             }
 
-            const label = classes.value[indices[i]]
-            const confidence = scores[i]
+            const label = classes.value[indices[i]] || ""
+            const confidence = scores[i] as number
             result.push({ box, class: label, confidence })
         }
 
