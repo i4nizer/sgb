@@ -16,5 +16,7 @@ declare module 'vue' {
     ReadingChart: typeof import('./src/components/app/monitor/ReadingChart.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SignInForm: typeof import('./src/components/auth/SignInForm.vue')['default']
+    SignUpForm: typeof import('./src/components/auth/SignUpForm.vue')['default']
   }
 }

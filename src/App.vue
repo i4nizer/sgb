@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import AuthLayout from './layouts/AuthLayout.vue';
 import type { Component } from 'vue';
 
 //
@@ -17,6 +18,7 @@ import type { Component } from 'vue';
 // --- Layouts
 const layouts: Record<string, Component> = {
 	"app": AppLayout,
+	"auth": AuthLayout,
 	"default": AppLayout,
 }
 
