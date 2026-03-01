@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "run-p type-check \"build-only {@}\" --",
+		"build:app": "npm run build && npx cap sync android && cd android && gradlew clean && gradlew assembleDebug && gradlew --stop && cd ..",
 		"preview": "vite preview",
 		"build-only": "vite build",
 		"type-check": "vue-tsc --build --force"

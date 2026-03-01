@@ -18,9 +18,9 @@ else self.postMessage(`AI model is not gpu accelerated, uses ${backend}.`)
 //
 
 self.onmessage = async (e: MessageEvent<ImageBitmap>) => {
-    const alpha = performance.now()
     const bboxes = await yoloPipelineMulticlass.predict(model, e.data, imgsz, classes, 0.9, 0.25, 100)
     self.postMessage(bboxes)
+    if (bboxes.length > 0) self.postMessage(`AI model found ${bboxes.map(b => b.class).join(", ")}.`)
 }
 
 //
