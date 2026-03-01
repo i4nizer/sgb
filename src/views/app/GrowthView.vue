@@ -85,8 +85,8 @@
             class="position-fixed bottom-0 right-0 mb-16 mr-5"
             location="right bottom"
             transition="fade"
-            :loading="cameraLoading || cldDetectorLoading"
-            :disabled="cameraLoading || cldDetectorLoading"
+            :loading="cameraLoading"
+            :disabled="cameraLoading"
         >
             <v-icon>mdi-scan-helper</v-icon>
             <v-speed-dial activator="parent">
@@ -181,48 +181,37 @@ const onClickPauseFrame = async () => {
 //
 
 // --- CLD Detection
-const cldDetectionCmp = useCldDetection()
+const cldDetectionWorker = ref<Worker>()
 const detections = ref<DetectionRawSchema[]>([])
 const showDetectionBBox = ref(true)
-const cldDetectorLoading = ref(false)
+const cldDetectionLastPost = ref(0)
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
-    if (!showDetectionBBox.value) return
-    await cldDetectionCmp.predict(canvas, 0.9, 0.25, 100)
-        .then((res) => detections.value = res)
-        .catch(() => toast.error("AI model detection errored."))
+    const elapsed = performance.now() - cldDetectionLastPost.value
+    if (!showDetectionBBox.value || !cldDetectionWorker.value || elapsed <= 250) return
+    const bitmap = await createImageBitmap(canvas)
+    cldDetectionWorker.value.postMessage(bitmap, [bitmap])
+    cldDetectionLastPost.value = performance.now()
+}
+
+const onCldDetectionMessage = async (e: MessageEvent<DetectionRawSchema[] | string>) => {
+    if (typeof e.data == "string") toast.info(e.data)
+    else detections.value = e.data
 }
 
 //
 
 const onMountedCb = async () => {
-    toast.warn("Camera is loading please wait.")
-    await nextTick()
+    const cldDetectionUrl = new URL("@/tasks/cld.detection.task.ts", import.meta.url)
+    cldDetectionWorker.value = new Worker(cldDetectionUrl, { type: "module" })
+    cldDetectionWorker.value.onmessage = onCldDetectionMessage
+    toast.warn("AI model initializing.")
 
+    toast.warn("Camera loading please wait.")
     cameraLoading.value = true
     await cameraCmp.list()
     cameraLoading.value = false
-
     toast.success("Camera loaded successfully.")
-    await nextTick()
-    
-    const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
-    const [url, imgsz, classes] = [VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES]
-    
-    toast.warn("AI model is loading please wait.")
-    await nextTick()
-    
-    cldDetectorLoading.value = true
-    await cldDetectionCmp.load(url, Number(imgsz), classes.split(", "))
-    await cldDetectionCmp.warmup()
-    cldDetectorLoading.value = false
-    
-    toast.success("AI model loaded successfully.")
-    await nextTick()
-
-    const backend = await cldDetectionCmp.backend()
-    const isGpu = backend.toLowerCase().includes("webgl")
-    toast.show(`AI model is ${isGpu ? "" : "not"} gpu accelerated, uses ${backend}.`, isGpu ? "accent" : "warning")
 }
 
 onMounted(onMountedCb)
