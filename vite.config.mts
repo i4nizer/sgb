@@ -24,6 +24,7 @@ export default defineConfig({
 			},
 		}),
 	],
+	worker: { format: "es" },
 	optimizeDeps: { exclude: ["vuetify"] },
 	define: { "process.env": {} },
 	resolve: {

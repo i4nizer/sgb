@@ -114,6 +114,7 @@ import useCldDetection from '@/composables/use-cld-detection';
 import useFileSave from '@/composables/use-file-save';
 import useToast from '@/composables/use-toast';
 import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
+import CldDetectionWorker from '@/tasks/cld.detection.task.ts?worker';
 import { nextTick, onMounted, ref } from 'vue';
 
 //
@@ -202,8 +203,7 @@ const onCldDetectionMessage = async (e: MessageEvent<DetectionRawSchema[] | stri
 //
 
 const onMountedCb = async () => {
-    const cldDetectionUrl = new URL("@/tasks/cld.detection.task.ts", import.meta.url)
-    cldDetectionWorker.value = new Worker(cldDetectionUrl, { type: "module" })
+    cldDetectionWorker.value = new CldDetectionWorker()
     cldDetectionWorker.value.onmessage = onCldDetectionMessage
     toast.warn("AI model initializing.")
 
