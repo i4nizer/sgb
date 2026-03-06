@@ -1,10 +1,34 @@
 import * as tf from "@tensorflow/tfjs"
+import "@tensorflow/tfjs-backend-wasm"
+import { setWasmPaths } from "@tensorflow/tfjs-backend-wasm"
 
 //
 
 const load = async (url: string) => {
+    setWasmPaths("/tfjs/")
+
+    const wasmms = await bench("wasm")
+    const webglms = await bench("webgl")
+    if (wasmms < webglms) await tf.setBackend("wasm")
+    
     await tf.ready()
     return await tf.loadGraphModel(url)
+}
+
+const bench = async (backend: "webgl" | "wasm") => {
+    await tf.setBackend(backend)
+    await tf.ready()
+
+    const input = tf.randomUniform([1, 256, 256, 3])
+    for (const _ in Array.from({ length: 100 })) tf.tidy(() => tf.sum(input))
+
+    const alpha = performance.now()
+    tf.tidy(() => tf.sum(input))
+    const omega = performance.now()
+
+    input.dispose()
+    tf.disposeVariables()
+    return omega - alpha
 }
 
 const warmup = async (model: tf.GraphModel, imgsz: number) => {
