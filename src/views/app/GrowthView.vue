@@ -110,12 +110,11 @@
 <script setup lang="ts">
 import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
 import useCamera from '@/composables/use-camera';
-import useCldDetection from '@/composables/use-cld-detection';
 import useFileSave from '@/composables/use-file-save';
 import useToast from '@/composables/use-toast';
 import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
 import CldDetectionWorker from '@/tasks/cld.detection.task.ts?worker';
-import { nextTick, onMounted, ref } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 //
 
@@ -169,6 +168,7 @@ const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
     if (freezePurpose.value != "Capture") return
     const dataUrl = canvas.toDataURL("image/jpeg", 1)
     const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1]! : dataUrl
+
     toast.success("Image captured successfully.")
     await fileSaveCmp.saveFile(base64, "image/jpeg", `sgb-capture-${Date.now()}.jpeg`)
     freezeScanning.value = freezePurpose.value == "Capture" ? false : freezeScanning.value
@@ -185,19 +185,22 @@ const onClickPauseFrame = async () => {
 const cldDetectionWorker = ref<Worker>()
 const detections = ref<DetectionRawSchema[]>([])
 const showDetectionBBox = ref(true)
-const cldDetectionLastPost = ref(0)
+const cldDetectionReceived = ref(true)
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
-    const elapsed = performance.now() - cldDetectionLastPost.value
-    if (!showDetectionBBox.value || !cldDetectionWorker.value || elapsed <= 250) return
+    if (!showDetectionBBox.value) return
+    if (!cldDetectionWorker.value) return
+    if (!cldDetectionReceived.value) return
+
+    cldDetectionReceived.value = false
     const bitmap = await createImageBitmap(canvas)
     cldDetectionWorker.value.postMessage(bitmap, [bitmap])
-    cldDetectionLastPost.value = performance.now()
 }
 
 const onCldDetectionMessage = async (e: MessageEvent<DetectionRawSchema[] | string>) => {
-    if (typeof e.data == "string") toast.info(e.data)
-    else detections.value = e.data
+    if (typeof e.data == "string") return toast.info(e.data)
+    detections.value = e.data
+    cldDetectionReceived.value = true
 }
 
 //
@@ -205,16 +208,19 @@ const onCldDetectionMessage = async (e: MessageEvent<DetectionRawSchema[] | stri
 const onMountedCb = async () => {
     cldDetectionWorker.value = new CldDetectionWorker()
     cldDetectionWorker.value.onmessage = onCldDetectionMessage
-    toast.warn("AI model initializing.")
 
-    toast.warn("Camera loading please wait.")
     cameraLoading.value = true
     await cameraCmp.list()
     cameraLoading.value = false
-    toast.success("Camera loaded successfully.")
+    toast.success("Camera initialized successfully.")
+}
+
+const onUnmountedCb = async () => {
+    if (cldDetectionWorker.value) cldDetectionWorker.value.terminate()
 }
 
 onMounted(onMountedCb)
+onUnmounted(onUnmountedCb)
 
 //
 

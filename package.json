@@ -23,6 +23,7 @@
 		"@mdi/font": "7.4.47",
 		"@tensorflow/tfjs": "^4.22.0",
 		"@vee-validate/zod": "^4.15.1",
+		"buffer": "^6.0.3",
 		"chart.js": "^4.5.1",
 		"chartjs-adapter-date-fns": "^3.0.0",
 		"pixi.js": "^8.16.0",
