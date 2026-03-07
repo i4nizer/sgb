@@ -1,5 +1,5 @@
 <template>
-	<v-app>
+	<v-app class="bg-primary">
 		<router-view #="{ Component, route }">
 			<component :is="layouts[route.meta?.layout as string] || layouts.default">
 				<component :is="Component" />
@@ -44,6 +44,13 @@ const onMountedCb = async () => {
 }
 
 onMounted(onMountedCb)
+
 //
 
 </script>
+
+<style>
+* {
+	font-family: 'DM Sans', sans-serif !important;
+}
+</style>
