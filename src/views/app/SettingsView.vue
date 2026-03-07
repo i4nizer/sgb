@@ -2,11 +2,20 @@
     <v-container class="">
         <v-row dense>
             <v-col cols="12">
-                <v-card>
-                    <v-card-text>
-                        <div class="w-100 d-flex align-center justify-space-between">
+                <h5 class="text-grey">Preferences</h5>
+                <v-list 
+                    class="bg-secondary"
+                    rounded="lg"
+                    density="compact" 
+                >
+                    <v-list-item>
+                        <template #prepend>
+                            <v-icon>{{ themeFlag ? `mdi-weather-night` : `mdi-white-balance-sunny` }}</v-icon>
+                        </template>
+                        <template #default>
                             <div class="font-weight-bold">Dark Mode</div>
-                            <v-spacer></v-spacer>
+                        </template>
+                        <template #append>
                             <v-switch
                                 inset
                                 hide-details
@@ -14,19 +23,58 @@
                                 v-model="themeFlag"
                                 @update:model-value="onChangeTheme"
                             ></v-switch>
-                        </div>
-                    </v-card-text>
-                </v-card>
+                        </template>
+                    </v-list-item>
+                </v-list>
+                <h5 class="mt-5 text-grey">Actions</h5>
+                <v-list 
+                    class="bg-secondary"
+                    rounded="lg"
+                    density="compact" 
+                >
+                    <v-list-item v-if="!isNative">
+                        <template #prepend>
+                            <v-icon color="accent">mdi-android</v-icon>
+                        </template>
+                        <template #default>
+                            <div class="font-weight-bold">Download APK</div>
+                        </template>
+                        <template #append>
+                            <v-btn
+                                size="small"
+                                icon="mdi-download"
+                                color="accent"
+                                :to="appApkUrl"
+                                :disabled="!appApkUrl"
+                            ></v-btn>
+                        </template>
+                    </v-list-item>
+                    <v-divider v-if="!isNative" class="my-2"></v-divider>
+                    <v-list-item>
+                        <v-btn
+                            to="/auth/sign-in"
+                            text="Logout"
+                            color="primary"
+                            class="w-100"
+                            prepend-icon="mdi-logout"
+                        ></v-btn>
+                    </v-list-item>
+                </v-list>
             </v-col>
         </v-row>
     </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useTheme } from 'vuetify';
+import { ref } from 'vue'
+import { useTheme } from 'vuetify'
+import { Capacitor } from '@capacitor/core'
 
 //
+
+// --- App
+const isNative = Capacitor.isNativePlatform()
+const appApkUrl = import.meta.env.VITE_APP_ANDROID_URL
 
 // --- Theme
 const theme = useTheme()

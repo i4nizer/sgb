@@ -4,6 +4,7 @@ interface ImportMetaEnv {
     readonly VITE_AI_CLD_URL: string
     readonly VITE_AI_CLD_IMGSZ: string
     readonly VITE_AI_CLD_CLASSES: string
+    readonly VITE_APP_ANDROID_URL: string
 }
 
 interface ImportMeta {
