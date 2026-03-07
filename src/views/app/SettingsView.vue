@@ -44,8 +44,8 @@
                                 size="small"
                                 icon="mdi-download"
                                 color="accent"
-                                :to="appApkUrl"
                                 :disabled="!appApkUrl"
+                                @click="onClickDownloadApk"
                             ></v-btn>
                         </template>
                     </v-list-item>
@@ -75,6 +75,10 @@ import { Capacitor } from '@capacitor/core'
 // --- App
 const isNative = Capacitor.isNativePlatform()
 const appApkUrl = import.meta.env.VITE_APP_ANDROID_URL
+
+const onClickDownloadApk = async () => {
+    window.location.href = appApkUrl
+}
 
 // --- Theme
 const theme = useTheme()
