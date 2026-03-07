@@ -2,19 +2,14 @@
     <v-container fluid class="fill-height">
         <v-row dense justify="center">
             <v-col cols="12" md="6" lg="4" xl="3" xxl="2">
-                <v-card>
+                <v-card class="bg-primary" elevation="0">
                     <v-card-title>Sign In</v-card-title>
                     <v-card-subtitle>Sign in to Dashboard</v-card-subtitle>
                     <v-card-text class="px-0">
-                        <SignInForm
-                            @submit="onSubmitSignIn"
-                        ></SignInForm>
-                        <router-link to="/auth/sign-up" class="mt-5 text-decoration-none text-black">
+                        <SignInForm @submit="onSubmitSignIn"></SignInForm>
                         <div class="w-100 text-center">
-                            <small class="text-grey">Don't have an account?&nbsp;</small>
-                            <small class="text-accent">Sign Up</small>
+                            <small class="text-grey">Contact admin for an account.</small>
                         </div>
-                    </router-link>
                     </v-card-text>
                 </v-card>
             </v-col>
