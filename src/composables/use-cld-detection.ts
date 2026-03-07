@@ -25,36 +25,35 @@ export default () => {
     
     const path = ref("")
     const size = ref(256)
-    const worker = ref<InstanceType<typeof CldDetectionWorker>>()
     const classes = ref<string[]>([])
+    
+    let model: Comlink.Remote<CldDetectionWorkerExpose> | undefined
+    let worker: InstanceType<typeof CldDetectionWorker> | undefined
 
     //
 
     const load = async (url: string, imgsz?: number, labels?: string[]) => {
         path.value = url
         size.value = imgsz || 256
-        worker.value = new CldDetectionWorker()
         classes.value = labels || []
         
-        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        worker = new CldDetectionWorker()
+        model = Comlink.wrap<CldDetectionWorkerExpose>(worker)
         await model.load(url, toRaw(size.value), toRaw(classes.value))
     }
 
     const warmup = async () => {
-        if (!worker.value) throw new Error(`AI model not initialized yet.`)
-        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        if (!model) throw new Error(`AI model not initialized yet.`)
         await model.warmup()
     }
     
     const predict = async (img: ImageBitmap, minIoU = 0.9, minScore = 0.25, maxBoxCount = 100) => {
-        if (!worker.value) throw new Error(`AI model not initialized yet.`)
-        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        if (!model) throw new Error(`AI model not initialized yet.`)
         return await model.predict(img, minIoU, minScore, maxBoxCount)
     }
     
     const dispose = async () => {
-        if (!worker.value) throw new Error(`AI model not initialized yet.`)
-        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        if (!model) throw new Error(`AI model not initialized yet.`)
         return await model.dispose()
     }
 
@@ -63,6 +62,7 @@ export default () => {
     return {
         path,
         size,
+        model,
         worker,
         classes,
         load,

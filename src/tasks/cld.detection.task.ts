@@ -37,7 +37,7 @@ const predict = async (image: ImageBitmap, minIoU?: number, minScore?: number, m
     const alpha = performance.now()
     const bboxes = await yoloPipelineMulticlass.predict(model, image, imgsize, classes, minIoU, minScore, maxBoxCount)
     
-    console.clear()
+    image.close()
     console.info(`AI model predicted in ${(performance.now() - alpha).toFixed(2)}ms.`)
     return bboxes
 }

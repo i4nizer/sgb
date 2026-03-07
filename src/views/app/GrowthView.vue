@@ -51,8 +51,8 @@
                             :src="stream"
                             :freeze="freezeScanning"
                             :detections="detections"
-                            @frame="onDrawCameraFrame"
-                            @freeze="onFreezeCapture"
+                            @frame="async (c) => onDrawCameraFrame(c).catch(console.error)"
+                            @freeze="async (c) => onFreezeCapture(c).catch(console.error)"
                         ></VideoBoundingBoxRenderer>
                     </v-responsive>
                 </v-card-text>
@@ -134,6 +134,7 @@ const onClickImage = async () => {
 
 const onClickCamera = async () => {
     showScanDialog.value = true
+    cldDetectionBusy.value = false
     const cameraId = cameras.value[cameraIndex.value]?.deviceId
     await cameraCmp.begin(cameraId)
 }
@@ -190,13 +191,14 @@ const showDetectionBBox = ref(true)
 const cldDetectionLoading = ref(false)
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
-    if (cldDetectionBusy.value) return
-    if (!showDetectionBBox.value) return
-
+    if (cldDetectionBusy.value) return;
+    if (!showDetectionBBox.value) return;
+    
     cldDetectionBusy.value = true
     const bitmap = await createImageBitmap(canvas)
     detections.value = await cldDetectionCmp.predict(bitmap)
     cldDetectionBusy.value = false
+    bitmap.close()
 }
 
 //
