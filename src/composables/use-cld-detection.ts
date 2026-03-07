@@ -1,93 +1,73 @@
-import yoloPipelineMulticlass from "@/utils/yolo.pipeline.multiclass"
-import * as tf from "@tensorflow/tfjs"
-import { ref, toRaw } from "vue"
+import * as Comlink from "comlink"
+import CldDetectionWorker from '@/tasks/cld.detection.task.ts?worker';
+import { ref, toRaw } from 'vue';
+import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
+
+//
+
+type CldDetectionWorkerExpose = {
+    load: (url: string, imgsz: number, labels: string[]) => Promise<void>
+    warmup: () => Promise<void>
+    dispose: () => Promise<void>
+    predict: (
+        image: ImageBitmap,
+        minIoU?: number,
+        minScore?: number,
+        maxBoxCount?: number
+    ) => Promise<DetectionRawSchema[]>
+}
 
 //
 
 export default () => {
-
+    
     //
-
+    
+    const path = ref("")
     const size = ref(256)
-    const model = ref<tf.GraphModel>()
+    const worker = ref<InstanceType<typeof CldDetectionWorker>>()
     const classes = ref<string[]>([])
 
     //
 
-    const load = async (
-        url: string,
-        imgsz?: number,
-        labels?: string[],
-    ) => {
+    const load = async (url: string, imgsz?: number, labels?: string[]) => {
+        path.value = url
         size.value = imgsz || 256
+        worker.value = new CldDetectionWorker()
         classes.value = labels || []
-        model.value = await yoloPipelineMulticlass.load(url)
-        return toRaw(model.value)
+        
+        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        await model.load(url, toRaw(size.value), toRaw(classes.value))
     }
 
     const warmup = async () => {
-        if (!model.value) return
-        await yoloPipelineMulticlass.warmup(toRaw(model.value), size.value)
+        if (!worker.value) throw new Error(`AI model not initialized yet.`)
+        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        await model.warmup()
     }
-
-    /** Runs preprocessing, prediction, and postprocessing to get bboxes. */
-    const predict = async (img: any, minIoU = 0.7, minScore = 0.5, maxBoxCount = 100) => {
-        if (!model.value) throw new Error("CLD model not found.")
-
-        return await yoloPipelineMulticlass
-            .predict(toRaw(model.value), img, size.value, classes.value, minIoU, minScore, maxBoxCount)
+    
+    const predict = async (img: ImageBitmap, minIoU = 0.9, minScore = 0.25, maxBoxCount = 100) => {
+        if (!worker.value) throw new Error(`AI model not initialized yet.`)
+        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        return await model.predict(img, minIoU, minScore, maxBoxCount)
     }
-
-    const backend = async () => {
-        return await yoloPipelineMulticlass.backend()
-    }
-
-
-    /** Resizes and normalizes an image. */
-    const preprocess = (img: Parameters<typeof tf.browser.fromPixels>[0]) => {
-        return yoloPipelineMulticlass.preprocess(img, size.value)
-    }
-
-    /** YOLOv26n has prediction vector of [x1, y1, x2, y2, objectness, indices]. */
-    const extract = (vector: any) => {
-        return yoloPipelineMulticlass.extract(vector)
-    }
-
-    /** Filters boxes based on IoU and objectness. */
-    const nms = async (boxes: any, scores: any, minIoU: number, minScore: number, maxBoxCount: number) => {
-        return await yoloPipelineMulticlass.nms(boxes, scores, minIoU, minScore, maxBoxCount)
-    }
-
-    const arrify = async (...tensors: any) => {
-        return await yoloPipelineMulticlass.arrify(tensors)
-    }
-
-    /** Use nms indices to find the passed boxes. */
-    const classify = (nmsi: any, boxes: any, scores: any, indices: any) => {
-        return yoloPipelineMulticlass.classify(size.value, classes.value, nmsi, boxes, scores, indices)
-    }
-
-    /** Combines all processing steps into usable result. */
-    const postprocess = async (prediction: any, minIoU = 0.5, minScore = 0.4, maxBoxCount = 100) => {
-        return yoloPipelineMulticlass
-            .postprocess(prediction, size.value, classes.value, minIoU, minScore, maxBoxCount)
+    
+    const dispose = async () => {
+        if (!worker.value) throw new Error(`AI model not initialized yet.`)
+        const model = Comlink.wrap<CldDetectionWorkerExpose>(worker.value)
+        return await model.dispose()
     }
 
     //
 
     return {
+        path,
         size,
-        model,
+        worker,
         classes,
         load,
         warmup,
         predict,
-        backend,
-        preprocess,
-        nms,
-        extract,
-        arrify,
-        classify,
-        postprocess,
+        dispose,
     }
 }

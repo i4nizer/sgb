@@ -85,8 +85,6 @@
             class="position-fixed bottom-0 right-0 mb-16 mr-5"
             location="right bottom"
             transition="fade"
-            :loading="cameraLoading"
-            :disabled="cameraLoading"
         >
             <v-icon>mdi-scan-helper</v-icon>
             <v-speed-dial activator="parent">
@@ -94,9 +92,12 @@
                     key="1"
                     color="accent" 
                     icon="mdi-camera"
+                    :loading="cameraLoading"
+                    :disabled="cameraLoading"
                     @click="onClickCamera"
                 ></v-btn>
                 <v-btn 
+                    disabled
                     key="1"
                     color="accent" 
                     icon="mdi-image"
@@ -108,18 +109,18 @@
 </template>
 
 <script setup lang="ts">
-import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
+import useToast from '@/composables/use-toast';
 import useCamera from '@/composables/use-camera';
 import useFileSave from '@/composables/use-file-save';
-import useToast from '@/composables/use-toast';
-import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
-import CldDetectionWorker from '@/tasks/cld.detection.task.ts?worker';
+import useCldDetection from '@/composables/use-cld-detection';
+import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
 import { nextTick, onMounted, onUnmounted, ref } from 'vue';
+import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
 
 //
 
 // --- Utils
-const toast = useToast()
+const toastCmp = useToast()
 
 // --- Camera
 const cameraCmp = useCamera()
@@ -169,7 +170,7 @@ const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
     const dataUrl = canvas.toDataURL("image/jpeg", 1)
     const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1]! : dataUrl
 
-    toast.success("Image captured successfully.")
+    toastCmp.success("Image captured successfully.")
     await fileSaveCmp.saveFile(base64, "image/jpeg", `sgb-capture-${Date.now()}.jpeg`)
     freezeScanning.value = freezePurpose.value == "Capture" ? false : freezeScanning.value
 }
@@ -182,42 +183,47 @@ const onClickPauseFrame = async () => {
 //
 
 // --- CLD Detection
-const cldDetectionWorker = ref<Worker>()
 const detections = ref<DetectionRawSchema[]>([])
+const cldDetectionCmp = useCldDetection()
+const cldDetectionBusy = ref(false)
 const showDetectionBBox = ref(true)
-const cldDetectionReceived = ref(true)
+const cldDetectionLoading = ref(false)
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
+    if (cldDetectionBusy.value) return
     if (!showDetectionBBox.value) return
-    if (!cldDetectionWorker.value) return
-    if (!cldDetectionReceived.value) return
 
-    cldDetectionReceived.value = false
+    cldDetectionBusy.value = true
     const bitmap = await createImageBitmap(canvas)
-    cldDetectionWorker.value.postMessage(bitmap, [bitmap])
-}
-
-const onCldDetectionMessage = async (e: MessageEvent<DetectionRawSchema[] | string>) => {
-    if (typeof e.data == "string") return toast.info(e.data)
-    detections.value = e.data
-    cldDetectionReceived.value = true
+    detections.value = await cldDetectionCmp.predict(bitmap)
+    cldDetectionBusy.value = false
 }
 
 //
 
 const onMountedCb = async () => {
-    cldDetectionWorker.value = new CldDetectionWorker()
-    cldDetectionWorker.value.onmessage = onCldDetectionMessage
-
     cameraLoading.value = true
-    await cameraCmp.list()
-    cameraLoading.value = false
-    toast.success("Camera initialized successfully.")
+    const camprom = cameraCmp
+        .list()
+        .then(() => toastCmp.success("Camera initialized."))
+        .finally(() => cameraLoading.value = false)
+    
+    const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
+    const [url, imgsz, classes] = [VITE_AI_CLD_URL, Number(VITE_AI_CLD_IMGSZ), VITE_AI_CLD_CLASSES?.split(", ")]
+
+    cldDetectionLoading.value = true
+    const cldprom = cldDetectionCmp
+        .load(url, imgsz, classes)
+        .then(() => cldDetectionCmp.warmup())
+        .then(() => toastCmp.success("AI Model loaded."))
+        .finally(() => cldDetectionLoading.value = false)
+
+    await Promise
+        .all([camprom, cldprom])
+        .catch(toastCmp.error)
 }
 
-const onUnmountedCb = async () => {
-    if (cldDetectionWorker.value) cldDetectionWorker.value.terminate()
-}
+const onUnmountedCb = async () => await cldDetectionCmp.dispose()
 
 onMounted(onMountedCb)
 onUnmounted(onUnmountedCb)
