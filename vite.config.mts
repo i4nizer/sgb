@@ -31,13 +31,5 @@ export default defineConfig({
 		alias: { "@": fileURLToPath(new URL("src", import.meta.url)) },
 		extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx", ".vue"],
 	},
-	server: {
-		port: 3000,
-		proxy: {
-			"/api": {
-				target: "http://localhost:4000",
-				changeOrigin: true,
-			}
-		}
-	},
+	server: { port: 3000 },
 })
