@@ -52,11 +52,13 @@
                     <v-divider v-if="!isNative" class="my-2"></v-divider>
                     <v-list-item>
                         <v-btn
-                            to="/auth/sign-in"
                             text="Logout"
                             color="primary"
                             class="w-100"
                             prepend-icon="mdi-logout"
+                            :loading="isSigningOut"
+                            :disabled="isSigningOut"
+                            @click="onClickSignOut"
                         ></v-btn>
                     </v-list-item>
                 </v-list>
@@ -66,11 +68,18 @@
 </template>
 
 <script setup lang="ts">
+import useToast from '@/composables/use-toast'
 import { ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { Capacitor } from '@capacitor/core'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
 //
+
+// --- Utils
+const toastCmp = useToast()
+const routerCmp = useRouter()
 
 // --- App
 const isNative = Capacitor.isNativePlatform()
@@ -78,6 +87,20 @@ const appApkUrl = import.meta.env.VITE_APP_ANDROID_URL
 
 const onClickDownloadApk = async () => {
     window.location.href = appApkUrl
+}
+
+// --- Auth
+const authStore = useAuthStore()
+const isSigningOut = ref(false)
+
+const onClickSignOut = async () => {
+    isSigningOut.value = true
+    await authStore
+        .signOut()
+        .then(() => toastCmp.success("User signed-out successfully."))
+        .then(async () => await routerCmp.push("/auth/sign-in"))
+        .catch((e) => toastCmp.error("Something went wrong."))
+    isSigningOut.value = false
 }
 
 // --- Theme
