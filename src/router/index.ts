@@ -15,7 +15,6 @@ const routes: RouteRecordRaw[] = [
         name: "welcome",
         meta: { layout: "home" },
         component: WelcomeView,
-        beforeEnter: [refreshAuth, redirectAuth, requireAuth],
     },
     {
         path: "/auth/sign-in",
