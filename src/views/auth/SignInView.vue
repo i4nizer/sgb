@@ -23,12 +23,16 @@ import type { SubmissionContext } from 'vee-validate';
 import { useRouter } from 'vue-router';
 import SignInForm from '@/components/auth/SignInForm.vue';
 import useToast from '@/composables/use-toast';
+import { useAuthStore } from '@/stores/auth';
 
 //
 
 // --- Utils
-const toast = useToast()
-const router = useRouter()
+const toastCmp = useToast()
+const routerCmp = useRouter()
+
+// --- Stores
+const authStore = useAuthStore()
 
 //
 
@@ -36,8 +40,10 @@ const onSubmitSignIn = async (
     values: UserSignInSchema,
     ctx: SubmissionContext<{ [K in keyof UserSignInSchema]?: unknown }>
 ) => {
-    await router.push("/app/home")
-    toast.success("User signed-in successfully.")
+    await authStore.signIn(values)
+        .then(() => toastCmp.success("User signed-in successfully."))
+        .then(async () => await routerCmp.push("/app/home"))
+        .catch((e) => toastCmp.error(e?.status == 400 ? "Incorrect credentials provided." : "Something went wrong."))
 }
 
 //
