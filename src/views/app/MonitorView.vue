@@ -12,8 +12,9 @@
                 </span>
             </v-col>
         </v-row>
-        <v-row v-if="!isPDFExporting" dense justify="center">
-            <v-col cols="12" class="d-flex justify-end">
+        <v-row v-if="!isPDFExporting" dense>
+            <v-col cols="12" class="d-flex align-center justify-space-between">
+                <h4 class="text-grey-darken-1">GRAPHS</h4>
                 <v-btn
                     text="Export PDF"
                     color="accent"
