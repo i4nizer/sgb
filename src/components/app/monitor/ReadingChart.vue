@@ -1,71 +1,96 @@
 <template>
-    <div>
+	<div>
 		<Line :key :data :options />
-    </div>
+	</div>
 </template>
 
 <script setup lang="ts">
-import colors from 'vuetify/util/colors'
 import { Line } from "vue-chartjs"
-import { ref, watch } from "vue";
 import type { ChartData, ChartOptions } from "chart.js"
-import type { ReadingChartSchema } from "@/schemas/ReadingSchema";
+import { ref, watch } from "vue"
+import type { ReadingSchema } from "@/schemas/ReadingSchema";
 
 //
 
-const props = defineProps<{ readings: ReadingChartSchema[] }>()
+// --- Props
+const props = defineProps<{ color?: string, readings: ReadingSchema[] }>()
 
+// --- Key Data
 const key = ref(0)
-const data: ChartData<"line"> = { datasets: [] }
+const data: ChartData<"line"> = { labels: [], datasets: [] }
 
+// --- Options
 const options: ChartOptions<"line"> = {
 	responsive: true,
 	maintainAspectRatio: false,
+	plugins: {
+		legend: { display: false }
+	},
 	scales: {
 		x: {
-			type: "time",
-			time: {
-				unit: "hour",
-				displayFormats: { hour: "HH:mm" },
+			grid: { display: false },
+			border: { display: false },
+			ticks: {
+				color: "#aaa",
+				font: { size: 12 },
 			},
-			ticks: { autoSkip: false },
 		},
 		y: {
-			beginAtZero: false,
-			title: { display: false },
+			grid: {
+				color: "rgba(0,0,0,0.08)",
+				lineWidth: 1,
+				//@ts-ignore
+				borderDash: [4, 4],
+			},
+			border: { display: false, dash: [4, 4] },
+			ticks: {
+				color: "#aaa",
+				font: { size: 12 },
+				maxTicksLimit: 5,
+			},
+		},
+	},
+	elements: {
+		point: { radius: 0, hoverRadius: 0 },
+		line: {
+			tension: 0.4,
+			borderWidth: 2,
 		},
 	},
 }
 
 //
 
-const getColor = (type: string) => {
-	if (type.toLowerCase().trim().startsWith("humidity")) return colors.blue.base
-	else if (type.toLowerCase().trim().startsWith("temperature")) return colors.red.base
-	else if (type.toLowerCase().trim().startsWith("soil")) return colors.brown.base
-	else return colors.yellow.base
+const getGradient = () => {
+	const canvas = document.createElement("canvas")
+	const ctx = canvas.getContext("2d")!
+	const gradient = ctx.createLinearGradient(0, 0, 0, 300)
+	gradient.addColorStop(0, (props.color || "") + "55")
+	gradient.addColorStop(1, (props.color || "") + "00")
+	return gradient
 }
-
-const getDataset = (readings: ReadingChartSchema[]) => {
-	const types = [...new Set<string>(readings.map((r) => r.name)).values()]
-	const datasets = []
-
-	for (const type of types) {
-		const grouped = readings.filter((r) => r.name == type)
-		const data = grouped.map((r) => ({ x: r.createdAt, y: r.value }))
-		const dataset = { label: type, data, borderWidth: 2, tension: 0.35, pointRadius: 4 }
-		datasets.push({ ...dataset, backgroundColor: getColor(type) })
-	}
-
-	data.datasets = datasets as any
-	key.value++
-}
-
-watch(() => props.readings, getDataset, { deep: true, immediate: true })
 
 //
 
+const onChangeReadings = async (readings: ReadingSchema[]) => {
+	const labels = readings.map((r) => r.createdAt.toLocaleString("en-US", { month: "short", day: "2-digit" }))
+
+	const dataset = {
+		data: readings.map((r) => r.value),
+		borderColor: props.color,
+		backgroundColor: getGradient(),
+		fill: true,
+		borderWidth: 2,
+	}
+
+	data.labels = labels
+	data.datasets = [dataset]
+	key.value++
+}
+
+watch(() => props.readings, onChangeReadings, { immediate: true, deep: true })
+
+//
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
