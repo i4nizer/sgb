@@ -35,27 +35,27 @@ export default createVuetify({
 			elevation: 0,
 		},
 		VTextField: {
-			variant: "outlined",
+			variant: "underlined",
 			density: "compact",
 			class: "mt-1",
 		},
 		VNumberInput: {
-			variant: "outlined",
+			variant: "underlined",
 			density: "compact",
 			class: "mt-1",
 		},
 		VSelect: {
-			variant: "outlined",
+			variant: "underlined",
 			density: "compact",
 			class: "mt-1",
 		},
 		VTextarea: {
-			variant: "outlined",
+			variant: "underlined",
 			density: "compact",
 			class: "mt-1",
 		},
 		VDateInput: {
-			variant: "outlined",
+			variant: "underlined",
 			density: "compact",
 			class: "mt-1",
 		},

@@ -1,12 +1,25 @@
 <template>
-    <v-container fluid class="fill-height">
-        <v-row dense justify="center">
+    <v-container fluid class="pt-16">
+        <v-sheet class="d-flex justify-center">
+            <v-sheet
+                class="blob position-fixed top-0 mt-n10 rounded-circle"
+                width="150dvw"
+                height="max(120px, 10dvh)"
+            ></v-sheet>
+        </v-sheet>
+        <v-row dense class="pt-16" justify="center">
             <v-col cols="12" md="6" lg="4" xl="3" xxl="2">
-                <v-card class="bg-primary" elevation="0">
-                    <v-card-title>Sign In</v-card-title>
-                    <v-card-subtitle>Sign in to Dashboard</v-card-subtitle>
+                <v-card 
+                    class="bg-primary" 
+                    elevation="0"
+                >
+                    <v-card-title class="font-weight-bold text-center">Sign In</v-card-title>
+                    <v-card-subtitle class="text-center">Sign in to Dashboard</v-card-subtitle>
                     <v-card-text class="px-0">
-                        <SignInForm @submit="onSubmitSignIn"></SignInForm>
+                        <SignInForm 
+                            class="mt-5"
+                            @submit="onSubmitSignIn"
+                        ></SignInForm>
                         <div class="w-100 text-center">
                             <small class="text-grey">Contact admin for an account.</small>
                         </div>
@@ -51,5 +64,8 @@ const onSubmitSignIn = async (
 </script>
 
 <style scoped>
-
+.blob {
+    background: #008A17;
+    background: linear-gradient(180deg, rgb(var(--v-theme-accent)) 0%, rgb(var(--v-theme-secondary)) 100%);
+}
 </style>

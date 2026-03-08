@@ -2,6 +2,7 @@
 	<v-form class="d-flex flex-column align-center" @submit.prevent="onSubmit">
 		<v-text-field
 			type="email"
+			color="accent"
 			class="w-75"
 			label="Email"
 			v-model="email"
@@ -9,6 +10,7 @@
 			:error-messages="emailError"
 		></v-text-field>
 		<v-text-field
+			color="accent"
 			class="w-75"
 			label="Password"
 			v-model="password"
