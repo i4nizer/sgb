@@ -3,7 +3,7 @@
         <v-row v-if="isPDFExporting" dense>
             <v-col cols="12" class="pt-5 d-flex flex-column align-center">
                 <h3 class="font-weight-black">SGB Monitoring Report</h3>
-                <span class="text-grey">
+                <span class="text-grey text-center">
                     <span>Reports from &nbsp;</span>
                     <span>{{ dateCmp.format(readingSorted[0]?.createdAt, "fullDateTime12h") }} to &nbsp;</span>
                     <span>
