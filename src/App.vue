@@ -21,6 +21,8 @@ import HomeLayout from './layouts/HomeLayout.vue'
 import ToastQueue from '@/components/ToastQueue.vue'
 import useToast from '@/composables/use-toast'
 import { useTheme } from 'vuetify'
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
 import { onMounted, type Component } from 'vue'
 
 //
@@ -43,6 +45,11 @@ const layouts: Record<string, Component> = {
 const onMountedCb = async () => {
 	const savedTheme = localStorage.getItem("theme") ?? "system"
 	theme.change(savedTheme)
+
+	const native = Capacitor.isNativePlatform()
+	if (native) StatusBar.setBackgroundColor({ color: "#00000000" })
+	if (native) StatusBar.setOverlaysWebView({ overlay: true })
+	if (native) StatusBar.setStyle({ style: savedTheme == "dark" ? Style.Dark : Style.Light })
 }
 
 onMounted(onMountedCb)

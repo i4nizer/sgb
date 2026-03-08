@@ -71,9 +71,10 @@
 import useToast from '@/composables/use-toast'
 import { ref } from 'vue'
 import { useTheme } from 'vuetify'
-import { Capacitor } from '@capacitor/core'
-import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { Capacitor } from '@capacitor/core'
+import { StatusBar, Style } from '@capacitor/status-bar'
 
 //
 
@@ -111,6 +112,9 @@ const onChangeTheme = (v: unknown) => {
     const value = !!v ? "dark" : "light"
     theme.change(value)
     localStorage.setItem("theme", value)
+
+    const native = Capacitor.isNativePlatform()
+    if (native) StatusBar.setStyle({ style: value == "dark" ? Style.Dark : Style.Light })
 }
 
 //
