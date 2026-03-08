@@ -92,8 +92,8 @@
                     key="1"
                     color="accent" 
                     icon="mdi-camera"
-                    :loading="cameraLoading"
-                    :disabled="cameraLoading"
+                    :loading="cameraLoading || cldDetectionLoading"
+                    :disabled="cameraLoading || cldDetectionLoading"
                     @click="onClickCamera"
                 ></v-btn>
                 <v-btn 
