@@ -28,7 +28,7 @@ export default () => {
     }
     
     const success = (text: string) => {
-        messages.value.push({ id: counter.value++, text, color: "accent" })
+        messages.value.push({ id: counter.value++, text, color: "white" })
     }
 
     const remove = (msg: { id: number, text: string, color: string }) => {
