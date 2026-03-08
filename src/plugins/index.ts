@@ -1,8 +1,8 @@
 import vuetify from "./vuetify"
 import router from "@/router"
 import pinia from "./pinia"
-import "./chartjs"
 import type { App } from "vue"
+import "chart.js/auto"
 
 //
 
