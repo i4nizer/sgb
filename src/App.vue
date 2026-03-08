@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import AuthLayout from './layouts/AuthLayout.vue'
+import HomeLayout from './layouts/HomeLayout.vue'
 import ToastQueue from '@/components/ToastQueue.vue'
 import useToast from '@/composables/use-toast'
 import { useTheme } from 'vuetify'
@@ -33,6 +34,7 @@ const { messages } = toast
 const layouts: Record<string, Component> = {
 	"app": AppLayout,
 	"auth": AuthLayout,
+	"home": HomeLayout,
 	"default": AppLayout,
 }
 
