@@ -14,9 +14,15 @@ export const useAuthStore = defineStore("auth", () => {
     //
 
     const whoami = async () => {
-        const res = await api.get<UserSafeSchema>("/auth/me")
-        user.value = res.data
-        return res.data
+        let error: any = undefined
+        await api
+            .get<UserSafeSchema>("/auth/me")
+            .then((res) => user.value = res.data)
+            .catch((e) => error = e)
+        
+        if (error) user.value = undefined
+        if (error) throw new Error(error)
+        return user.value
     }
 
     const signIn = async (data: UserSignInSchema) => {
