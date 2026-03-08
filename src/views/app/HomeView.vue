@@ -2,21 +2,11 @@
     <v-container class="">
         <v-row dense>
             <v-col cols="12">
-                <Transition>
-                    <v-card v-if="showWelcomeNotif" color="accent" elevation="1">
-                        <template #prepend>
-                            <v-icon>mdi-pulse</v-icon>
-                        </template>
-                        <template #title>
-                            <span>Welcome Back!</span>
-                        </template>
-                        <template #subtitle>
-                            <span>All systems working smoothly</span>
-                        </template>
-                    </v-card>
-                </Transition>
+                <h4 class="text-grey-darken-1">DASHBOARD</h4>
             </v-col>
-            <v-col cols="12" sm="6" lg="4">
+        </v-row>
+        <v-row dense>
+            <v-col cols="6" sm="6" lg="4">
                 <ReadingCard
                     icon="mdi-thermometer"
                     unit="C"
@@ -27,7 +17,7 @@
                     :value="26.5"
                 ></ReadingCard>
             </v-col>
-            <v-col cols="12" sm="6" lg="4">
+            <v-col cols="6" sm="6" lg="4">
                 <ReadingCard
                     icon="mdi-water-outline"
                     unit="%"
@@ -38,7 +28,7 @@
                     :value="26.5"
                 ></ReadingCard>
             </v-col>
-            <v-col cols="12" sm="6" lg="4">
+            <v-col cols="6" sm="6" lg="4">
                 <ReadingCard
                     icon="mdi-sprout-outline"
                     unit="%"
@@ -49,7 +39,7 @@
                     :value="58"
                 ></ReadingCard>
             </v-col>
-            <v-col cols="12" sm="6" lg="4">
+            <v-col cols="6" sm="6" lg="4">
                 <ReadingCard
                     icon="mdi-information-outline"
                     unit="%"
