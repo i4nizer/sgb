@@ -15,7 +15,7 @@ export default createVuetify({
 				colors: {
 					accent: "#008a17",
 					primary: "#f9faf9",
-					secondary: "#5bbd46",
+					secondary: "#ecfae9",
 				},
 			},
 			dark: {
