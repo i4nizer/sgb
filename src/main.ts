@@ -1,5 +1,5 @@
-import { registerPlugins } from "@/plugins"
 import App from "./App.vue"
+import plugins from "@/plugins"
 import { createApp } from "vue"
 import "unfonts.css"
 import "@fontsource/dm-sans"
@@ -11,5 +11,5 @@ import "@fontsource/dm-sans/700.css"
 //
 
 const app = createApp(App)
-registerPlugins(app)
+plugins.registerPlugins(app)
 app.mount("#app")
