@@ -2,11 +2,17 @@
     <v-container class="">
         <v-row dense>
             <v-col cols="12">
+                <h4 class="text-grey-darken-1">SETTINGS</h4>
+            </v-col>
+        </v-row>
+        <v-row dense class="mt-2">
+            <v-col cols="12">
                 <h5 class="text-grey">Preferences</h5>
                 <v-list 
                     class="bg-secondary"
                     rounded="lg"
-                    density="compact" 
+                    density="compact"
+                    elevation="1" 
                 >
                     <v-list-item>
                         <template #prepend>
