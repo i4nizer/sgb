@@ -1,22 +1,13 @@
 <template>
-    <v-layout>
-        <v-app-bar
-            flat
-            color="accent"
-            class="px-5"
-            elevation="6"
-        >
-            <v-avatar size="36" class="mr-2">
-                <v-img src="/coffee.jpg" />
-            </v-avatar>
-            <v-app-bar-title>
-                <div class="d-flex flex-column ga-0">
-                    <span>Smart Germination Box</span>
-                    <small class="text-grey-lighten-1 text-subtitle-2">IoT Coffee Nursery</small>
-                </div>
-            </v-app-bar-title>
-        </v-app-bar>
-        <v-main>
+    <v-layout class="pt-16">
+        <v-main class="pt-0">
+            <v-sheet class="w-100 d-flex justify-center">
+                <v-sheet
+                    class="blob position-fixed top-0 mt-n16 rounded-circle"
+                    width="150dvw"
+                    height="max(120px, 10dvh)"
+                ></v-sheet>
+            </v-sheet>
             <slot></slot>
         </v-main>
         <v-bottom-navigation 
@@ -24,7 +15,7 @@
             fixed 
             mode="shift" 
             color="accent"
-            class="position-fixed bottom-0 left-0" 
+            class="position-fixed bottom-0 left-0 text-grey-darken-1" 
         >
             <v-btn to="/app/home" value="home">
                 <v-icon>mdi-home</v-icon>
@@ -51,5 +42,8 @@
 </script>
 
 <style scoped>
-
+.v-app-bar, .blob {
+    background: #008A17;
+    background: linear-gradient(270deg, rgb(var(--v-theme-accent)) 0%, rgb(var(--v-theme-secondary)) 100%);
+}
 </style>
