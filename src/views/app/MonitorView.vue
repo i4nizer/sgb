@@ -1,5 +1,28 @@
 <template>
-    <v-container class="">
+    <v-container id="printable">
+        <v-row v-if="isPDFExporting" dense>
+            <v-col cols="12" class="pt-5 d-flex flex-column align-center">
+                <h3 class="font-weight-black">SGB Monitoring Report</h3>
+                <span class="text-grey">
+                    <span>Reports from &nbsp;</span>
+                    <span>{{ dateCmp.format(readingSorted[0]?.createdAt, "fullDateTime12h") }} to &nbsp;</span>
+                    <span>
+                        {{ dateCmp.format(readingSorted[readingSorted.length - 1]?.createdAt, "fullDateTime12h") }}.
+                    </span>
+                </span>
+            </v-col>
+        </v-row>
+        <v-row v-if="!isPDFExporting" dense justify="center">
+            <v-col cols="12" class="d-flex justify-end">
+                <v-btn
+                    text="Export PDF"
+                    color="accent"
+                    prepend-icon="mdi-file"
+                    :loading="isPDFExporting"
+                    @click="onClickExportPDF"
+                ></v-btn>
+            </v-col>
+        </v-row>
         <v-row dense>
             <v-col cols="12" lg="6">
                 <v-card class="pt-4" elevation="1">
@@ -63,21 +86,45 @@
 </template>
 
 <script setup lang="ts">
-import ReadingChart from '@/components/app/monitor/ReadingChart.vue';
 import useToast from '@/composables/use-toast';
-import { useTheme } from 'vuetify';
+import useFileSave from '@/composables/use-file-save';
+import ReadingChart from '@/components/app/monitor/ReadingChart.vue';
+import { useDate, useTheme } from 'vuetify';
 import { useReadingStore } from '@/stores/reading';
-import { onMounted, toRefs } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import useReport from '@/composables/use-report';
 
 //
 
 // --- Utils
+const dateCmp = useDate()
 const toastCmp = useToast()
 const themeCmp = useTheme()
 
 // --- Reading
 const readingStore = useReadingStore()
-const { humidities, temperatures, soilMoistures } = toRefs(readingStore)
+const { readings, humidities, temperatures, soilMoistures } = storeToRefs(readingStore)
+const readingSorted = computed(() => [...readings.value].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()))
+
+// --- PDF Exporting
+const reportCmp = useReport()
+const fileSaveCmp = useFileSave()
+const isPDFExporting = ref(false)
+
+const onClickExportPDF = async () => {
+    const el = document.getElementById("printable")
+    if (!el) return
+
+    isPDFExporting.value = true
+    await nextTick()
+
+    const pdf = await reportCmp.generatePDF(el)
+    const base64 = pdf.output('datauristring').split(',')[1]!
+
+    await fileSaveCmp.saveFile(base64, "pdf", `report-${Date.now()}.pdf`)
+    isPDFExporting.value = false
+}
 
 //
 
