@@ -37,6 +37,7 @@ import { useRouter } from 'vue-router';
 import SignInForm from '@/components/auth/SignInForm.vue';
 import useToast from '@/composables/use-toast';
 import { useAuthStore } from '@/stores/auth';
+import { usePushStore } from '@/stores/push';
 
 //
 
@@ -46,6 +47,7 @@ const routerCmp = useRouter()
 
 // --- Stores
 const authStore = useAuthStore()
+const pushStore = usePushStore()
 
 //
 
@@ -55,6 +57,7 @@ const onSubmitSignIn = async (
 ) => {
     await authStore.signIn(values)
         .then(() => toastCmp.success("User signed-in successfully."))
+        .then(() => pushStore.connect())
         .then(async () => await routerCmp.push("/app/home"))
         .catch((e) => toastCmp.error(e?.status == 400 ? "Incorrect credentials provided." : "Something went wrong."))
 }

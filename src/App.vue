@@ -24,13 +24,17 @@ import { useTheme } from 'vuetify'
 import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { onMounted, type Component } from 'vue'
+import { useAuthStore } from './stores/auth'
+import { usePushStore } from './stores/push'
 
 //
 
 // --- Utils
-const toast = useToast()
-const theme = useTheme()
-const { messages } = toast
+const toastCmp = useToast()
+const themeCmp = useTheme()
+const authStore = useAuthStore()
+const pushStore = usePushStore()
+const { messages } = toastCmp
 
 // --- Layouts
 const layouts: Record<string, Component> = {
@@ -44,12 +48,15 @@ const layouts: Record<string, Component> = {
 
 const onMountedCb = async () => {
 	const savedTheme = localStorage.getItem("theme") ?? "system"
-	theme.change(savedTheme)
+	themeCmp.change(savedTheme)
 
 	const native = Capacitor.isNativePlatform()
 	if (native) StatusBar.setBackgroundColor({ color: "#00000000" })
 	if (native) StatusBar.setOverlaysWebView({ overlay: true })
 	if (native) StatusBar.setStyle({ style: savedTheme == "dark" ? Style.Dark : Style.Light })
+
+	if (authStore.user) await pushStore.connect()
+	
 }
 
 onMounted(onMountedCb)
