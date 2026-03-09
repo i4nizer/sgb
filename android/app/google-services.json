@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "620553495124",
+    "project_id": "sgbijn",
+    "storage_bucket": "sgbijn.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:620553495124:android:f76ac7f9d90b88b97a03c1",
+        "android_client_info": {
+          "package_name": "com.sgb.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf7XiFmndvjPWl29XenHuY4o1Ls2r-G_o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
