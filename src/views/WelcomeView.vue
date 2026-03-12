@@ -23,7 +23,7 @@
         </v-row>
         <v-sheet 
             color="transparent"
-            class="d-flex justify-center position-absolute bottom-0 mb-16"
+            class="d-flex justify-center position-absolute left-0 bottom-0 mb-16"
             width="100%" 
         >
             <v-btn
