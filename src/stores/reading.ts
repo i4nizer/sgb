@@ -17,7 +17,7 @@ export const useReadingStore = defineStore("reading", () => {
     //
 
     const getReadings = async () => {
-        const res = await api.get<ReadingSchema[]>("/reading")
+        const res = await api.get<ReadingSchema[]>("/api/reading")
         readings.splice(0, readings.length)
         readings.push(...res.data.map((r) => ReadingSchema.parse(r)))
         return res.data

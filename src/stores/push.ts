@@ -27,7 +27,7 @@ export const usePushStore = defineStore("push", () => {
 
     const register = async (token: Token) => {
         await api
-            .post("/device", { token: token.value })
+            .post("/api/device", { token: token.value })
             .then(() => connected.value = true)
             .catch(() => connected.value = false)
     }

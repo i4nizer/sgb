@@ -16,7 +16,7 @@ export const useAuthStore = defineStore("auth", () => {
     const whoami = async () => {
         let error: any = undefined
         await api
-            .get<UserSafeSchema>("/auth/me")
+            .get<UserSafeSchema>("/api/auth/me")
             .then((res) => user.value = res.data)
             .catch((e) => error = e)
 
@@ -32,7 +32,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     const signOut = async () => {
-        await api.post<UserSafeSchema>("/auth/sign-out")
+        await api.post<UserSafeSchema>("/api/auth/sign-out")
         user.value = undefined
     }
 
