@@ -1,5 +1,5 @@
 import { ReadingSchema } from "@/schemas/ReadingSchema";
-import api from "@/utils/api";
+import { api } from "@/plugins/api";
 import { defineStore } from "pinia";
 import { computed, reactive } from "vue";
 

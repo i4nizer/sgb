@@ -1,4 +1,4 @@
-import api from "@/utils/api"
+import { api } from "@/plugins/api"
 import { ref } from "vue"
 import { defineStore } from "pinia"
 import type { UserSafeSchema, UserSignInSchema } from "@/schemas/UserSchema"
@@ -19,7 +19,7 @@ export const useAuthStore = defineStore("auth", () => {
             .get<UserSafeSchema>("/auth/me")
             .then((res) => user.value = res.data)
             .catch((e) => error = e)
-        
+
         if (error) user.value = undefined
         if (error) throw new Error(error)
         return user.value

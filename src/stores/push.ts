@@ -1,4 +1,4 @@
-import api from "@/utils/api"
+import { api } from "@/plugins/api"
 import { Capacitor } from "@capacitor/core"
 import { PushNotifications, type Token } from "@capacitor/push-notifications"
 import { defineStore } from "pinia";
@@ -7,7 +7,7 @@ import { ref } from "vue";
 //
 
 export const usePushStore = defineStore("push", () => {
-    
+
     //
 
     const connected = ref(false)
@@ -17,10 +17,10 @@ export const usePushStore = defineStore("push", () => {
     const connect = async () => {
         const isNative = Capacitor.isNativePlatform()
         if (!isNative || connected.value) return
-        
+
         const perm = await PushNotifications.requestPermissions()
         if (perm.receive !== "granted") return console.info(`Push notification permission denied.`)
-    
+
         await PushNotifications.register()
         PushNotifications.addListener("registration", register)
     }
