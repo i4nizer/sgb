@@ -9,10 +9,8 @@
             <v-col cols="12">
                 <h5 class="text-grey">Preferences</h5>
                 <v-list 
-                    class="bg-secondary"
                     rounded="lg"
                     density="compact"
-                    elevation="1" 
                 >
                     <v-list-item>
                         <template #prepend>
@@ -34,7 +32,6 @@
                 </v-list>
                 <h5 class="mt-5 text-grey">Actions</h5>
                 <v-list 
-                    class="bg-secondary"
                     rounded="lg"
                     density="compact" 
                 >
@@ -59,7 +56,7 @@
                     <v-list-item>
                         <v-btn
                             text="Logout"
-                            color="primary"
+                            color="red"
                             class="w-100"
                             prepend-icon="mdi-logout"
                             :loading="isSigningOut"
