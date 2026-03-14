@@ -23,6 +23,7 @@ const UserQuerySchema = UserSchema.partial()
 const UserSignInSchema = UserSchema.pick({ email: true, password: true })
 const UserCreateSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true })
 const UserUpdateSchema = UserSchema.omit({ id: true, createdAt: true, updatedAt: true }).partial()
+const UserDeleteSchema = UserSchema.pick({ name: true })
 
 //
 
@@ -32,6 +33,7 @@ type UserQuerySchema = z.infer<typeof UserQuerySchema>
 type UserSignInSchema = z.infer<typeof UserSignInSchema>
 type UserCreateSchema = z.infer<typeof UserCreateSchema>
 type UserUpdateSchema = z.infer<typeof UserUpdateSchema>
+type UserDeleteSchema = z.infer<typeof UserDeleteSchema>
 
 //
 
@@ -43,4 +45,5 @@ export {
     UserSignInSchema,
     UserCreateSchema,
     UserUpdateSchema,
+    UserDeleteSchema,
 }

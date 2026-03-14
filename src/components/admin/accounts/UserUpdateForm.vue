@@ -44,7 +44,7 @@
 			@click:append-inner="showPassword = !showPassword"
 		></v-text-field>
 		<v-btn 
-            text="Create"
+            text="Update"
 			type="submit" 
 			color="accent" 
 			class="w-75 my-2" 

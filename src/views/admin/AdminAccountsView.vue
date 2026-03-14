@@ -36,6 +36,7 @@
                             elevation="0"
                             :class="`text-${authStore.user?.id == item.id ? `grey` : `red`} bg-transparent`"
                             :disabled="authStore.user?.id == item.id"
+                            @click="onClickDeleteUser(item)"
                         ></v-btn>
                     </template>
                     <template #bottom></template>
@@ -59,6 +60,16 @@
                     :disabled="isUpdatingUser"
                     @submit="onSubmitUpdateUser"
                 ></UserUpdateForm>
+            </v-card>
+        </v-dialog>
+        <v-dialog v-model="showDeleteUserDialog">
+            <v-card class="py-5">
+                <v-card-title class="text-center font-weight-bold">Delete User</v-card-title>
+                <UserDeleteForm
+                    :user="userToDelete"
+                    :disabled="isDeletingUser"
+                    @submit="onSubmitDeleteUser"
+                ></UserDeleteForm>
             </v-card>
         </v-dialog>
         <v-fab
@@ -89,7 +100,7 @@
 
 <script setup lang="ts">
 import { api } from "@/plugins/api"
-import { UserSchema, type UserCreateSchema, type UserUpdateSchema } from "@/schemas/UserSchema";
+import { UserDeleteSchema, UserSchema, type UserCreateSchema, type UserUpdateSchema } from "@/schemas/UserSchema";
 import { useAuthStore } from "@/stores/auth";
 import { onMounted, ref, reactive } from 'vue';
 import type { DataTableHeader } from "vuetify";
@@ -186,6 +197,34 @@ const onSubmitUpdateUser = async (
     ctx.resetForm()
     toastCmp.success("User updated successfully.")
     showUpdateUserDialog.value = false
+}
+
+// --- User Delete
+const userToDelete = ref<UserSchema>()
+const isDeletingUser = ref(false)
+const showDeleteUserDialog = ref(false)
+
+const onClickDeleteUser = (user: UserSchema) => {
+    userToDelete.value = user
+    showDeleteUserDialog.value = true
+}
+
+const onSubmitDeleteUser = async (
+    values: UserDeleteSchema,
+    ctx: SubmissionContext<{ [K in keyof UserDeleteSchema]?: unknown }>
+) => {
+    if (!userToDelete.value) return
+    isDeletingUser.value = true
+
+    const { res, err } = await deleteUser(userToDelete.value.id)
+        .then((res) => ({ res, err: undefined }))
+        .catch((err) => ({ res: undefined, err }))
+        .finally(() => isDeletingUser.value = false)
+
+    if (err) return toastCmp.error(err?.message || "Something went wrong.")
+    ctx.resetForm()
+    toastCmp.success("User deleted successfully.")
+    showDeleteUserDialog.value = false
 }
 
 //
