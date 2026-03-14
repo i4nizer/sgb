@@ -26,7 +26,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     const signIn = async (data: UserSignInSchema) => {
-        const res = await api.post<UserSafeSchema>("/auth/sign-in", data)
+        const res = await api.post<UserSafeSchema>("/api/auth/sign-in", data)
         user.value = res.data
         return res.data
     }
