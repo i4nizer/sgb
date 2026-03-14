@@ -21,6 +21,7 @@ declare module 'vue' {
     SignInForm: typeof import('./src/components/auth/SignInForm.vue')['default']
     SignUpForm: typeof import('./src/components/auth/SignUpForm.vue')['default']
     ThresholdCard: typeof import('./src/components/admin/thresholds/ThresholdCard.vue')['default']
+    ThresholdCreateForm: typeof import('./src/components/admin/thresholds/ThresholdCreateForm.vue')['default']
     ToastQueue: typeof import('./src/components/ToastQueue.vue')['default']
     UserCreateForm: typeof import('./src/components/admin/accounts/UserCreateForm.vue')['default']
     UserDeleteForm: typeof import('./src/components/admin/accounts/UserDeleteForm.vue')['default']

@@ -54,7 +54,7 @@ const layouts: Record<string, Component> = {
 	"auth": AuthLayout,
 	"home": HomeLayout,
 	"admin": AdminLayout,
-	"default": AppLayout,
+	"default": HomeLayout,
 }
 
 // --- Router

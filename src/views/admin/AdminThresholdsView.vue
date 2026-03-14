@@ -7,6 +7,7 @@
         </v-row>
         <v-row dense>
             <v-col 
+                v-if="!isFetchingThresholds"
                 v-for="t in thresholds"
                 cols="6"
                 :key="t.id"
@@ -22,15 +23,55 @@
                 <v-skeleton-loader type="article"></v-skeleton-loader>
             </v-col>
         </v-row>
+        <v-dialog v-model="showCreateThresholdDialog">
+            <v-card class="py-5">
+                <v-card-title class="text-center font-weight-bold">Create Threshold</v-card-title>
+                <ThresholdCreateForm
+                    :icons="[`mdi-water`, `mdi-water-outline`, `mdi-thermometer`]"
+                    :readings
+                    :disabled="isCreatingThreshold"
+                    @submit="onSubmitCreateThreshold"
+                ></ThresholdCreateForm>
+            </v-card>
+        </v-dialog>
+        <v-fab
+            icon
+            style="z-index: 999"
+            color="accent"
+            class="position-fixed bottom-0 right-0 mb-16 mr-5"
+            location="right bottom"
+            transition="fade"
+        >
+            <v-icon>mdi-plus-circle-outline</v-icon>
+            <v-speed-dial activator="parent">
+                <v-btn 
+                    key="1"
+                    color="accent" 
+                    icon="mdi-tune-vertical"
+                    @click="showCreateThresholdDialog = true"
+                ></v-btn>
+            </v-speed-dial>
+        </v-fab>
     </v-container>
 </template>
 
 <script setup lang="ts">
 import { api } from '@/plugins/api'
 import { ThresholdSchema, type ThresholdCreateSchema, type ThresholdUpdateSchema } from '@/schemas/ThresholdSchema'
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import type { SubmissionContext } from 'vee-validate';
+import useToast from '@/composables/use-toast';
+import ThresholdCreateForm from '@/components/admin/thresholds/ThresholdCreateForm.vue';
+import { useReadingStore } from '@/stores/reading';
 
 //
+
+// --- Utils
+const toastCmp = useToast()
+
+// --- Readings
+const readingStore = useReadingStore()
+const readings = computed(() => [...new Set(readingStore.readings.map(r => r.name)).values()])
 
 // --- Thresholds
 const thresholds = reactive<ThresholdSchema[]>([])
@@ -64,11 +105,31 @@ const deleteThreshold = async (id: number, ) => {
     if (index != -1) thresholds.splice(index, 1)
 }
 
+// --- Threshold Create
+const isCreatingThreshold = ref(false)
+const showCreateThresholdDialog = ref(false)
+
+const onSubmitCreateThreshold = async (
+    values: ThresholdCreateSchema,
+    ctx: SubmissionContext<{ [K in keyof ThresholdCreateSchema]?: unknown }>
+) => {
+    isCreatingThreshold.value = true
+    const { res, err } = await postThreshold(values)
+        .then((res) => ({ res, err: undefined }))
+        .catch((err) => ({ res: undefined, err }))
+        .finally(() => isCreatingThreshold.value = false)
+
+    if (err) return toastCmp.error(err?.message || "Something went wrong.")
+    ctx.resetForm()
+    toastCmp.success("Threshold created successfully.")
+    showCreateThresholdDialog.value = false
+}
+
 //
 
 const onMountedCb = async () => {
     isFetchingThresholds.value = true
-    await getThresholds()
+    await Promise.all([getThresholds(), readingStore.getReadings()])
     isFetchingThresholds.value = false
 }
 
