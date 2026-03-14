@@ -23,8 +23,9 @@ const requireAuth: NavigationGuard = async (to, from) => {
 const redirectAuth: NavigationGuard = async (to, from) => {
     const authStore = useAuthStore()
     if (authStore.user === undefined) return
-    if (to.path == "/app/home") return
-    return "/app/home"
+    
+    const path = authStore.user.role == "Admin" ? "/admin/accounts" : "/app/home"
+    if (to.path != path) return path
 }
 
 //
