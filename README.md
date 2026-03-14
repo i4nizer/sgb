@@ -23,7 +23,7 @@
     - [ ] Growth Monitoring
     - [x] Disease Detection
     - [x] Environmental Results
-- [ ] System Administration
+- [x] System Administration
     - [x] Manage User Accounts (Farmers & BPI Personnel)
     - [x] Configure Sensor Thresholds
-    - [ ] Disease Detection Parameters
+    - [x] Disease Detection Parameters
