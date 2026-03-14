@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    copy: typeof import('./src/components/admin/UserCreateForm copy.vue')['default']
     ImageBoundingBoxRenderer: typeof import('./src/components/app/growth/ImageBoundingBoxRenderer.vue')['default']
     ParticleDot: typeof import('./src/components/ParticleDot.vue')['default']
     ReadingCard: typeof import('./src/components/app/home/ReadingCard.vue')['default']
@@ -20,7 +21,8 @@ declare module 'vue' {
     SignInForm: typeof import('./src/components/auth/SignInForm.vue')['default']
     SignUpForm: typeof import('./src/components/auth/SignUpForm.vue')['default']
     ToastQueue: typeof import('./src/components/ToastQueue.vue')['default']
-    UserCreateForm: typeof import('./src/components/admin/UserCreateForm.vue')['default']
+    UserCreateForm: typeof import('./src/components/admin/accounts/UserCreateForm.vue')['default']
+    UserUpdateForm: typeof import('./src/components/admin/accounts/UserUpdateForm.vue')['default']
     VideoBoundingBoxRenderer: typeof import('./src/components/app/growth/VideoBoundingBoxRenderer.vue')['default']
   }
 }

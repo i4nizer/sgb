@@ -28,6 +28,7 @@
                             icon="mdi-pencil-outline"
                             class="text-blue bg-transparent"
                             elevation="0"
+                            @click="onClickUpdateUser(item)"
                         ></v-btn>
                         <v-btn
                             size="small"
@@ -48,6 +49,16 @@
                     :disabled="isCreatingUser"
                     @submit="onSubmitCreateUser"
                 ></UserCreateForm>
+            </v-card>
+        </v-dialog>
+        <v-dialog v-model="showUpdateUserDialog">
+            <v-card class="py-5">
+                <v-card-title class="text-center font-weight-bold">Update User</v-card-title>
+                <UserUpdateForm
+                    :user="userToUpdate"
+                    :disabled="isUpdatingUser"
+                    @submit="onSubmitUpdateUser"
+                ></UserUpdateForm>
             </v-card>
         </v-dialog>
         <v-fab
@@ -143,10 +154,38 @@ const onSubmitCreateUser = async (
         .catch((err) => ({ res: undefined, err }))
         .finally(() => isCreatingUser.value = false)
 
-    if (err) return toastCmp.error(err?.message || "")
+    if (err) return toastCmp.error(err?.message || "Something went wrong.")
     ctx.resetForm()
     toastCmp.success("User created successfully.")
     showCreateUserDialog.value = false
+}
+
+// --- User Update
+const userToUpdate = ref<UserSchema>()
+const isUpdatingUser = ref(false)
+const showUpdateUserDialog = ref(false)
+
+const onClickUpdateUser = (user: UserSchema) => {
+    userToUpdate.value = user
+    showUpdateUserDialog.value = true
+}
+
+const onSubmitUpdateUser = async (
+    values: UserUpdateSchema,
+    ctx: SubmissionContext<{ [K in keyof UserUpdateSchema]?: unknown }>
+) => {
+    if (!userToUpdate.value) return
+    isUpdatingUser.value = true
+
+    const { res, err } = await patchUser(userToUpdate.value.id, values)
+        .then((res) => ({ res, err: undefined }))
+        .catch((err) => ({ res: undefined, err }))
+        .finally(() => isUpdatingUser.value = false)
+
+    if (err) return toastCmp.error(err?.message || "Something went wrong.")
+    ctx.resetForm()
+    toastCmp.success("User updated successfully.")
+    showUpdateUserDialog.value = false
 }
 
 //
