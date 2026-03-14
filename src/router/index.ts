@@ -8,6 +8,7 @@ import SettingsView from "@/views/app/SettingsView.vue"
 import WelcomeView from "@/views/WelcomeView.vue"
 import AdminAccountsView from "@/views/admin/AdminAccountsView.vue"
 import AdminThresholdsView from "@/views/admin/AdminThresholdsView.vue"
+import AdminDetectionView from "@/views/admin/AdminDetectionView.vue"
 
 //
 
@@ -37,6 +38,13 @@ const routes: RouteRecordRaw[] = [
         name: "thresholds",
         meta: { layout: "admin" },
         component: AdminThresholdsView,
+        beforeEnter: [refreshAuth, requireAuth],
+    },
+    {
+        path: "/admin/detection",
+        name: "detection",
+        meta: { layout: "admin" },
+        component: AdminDetectionView,
         beforeEnter: [refreshAuth, requireAuth],
     },
     {
