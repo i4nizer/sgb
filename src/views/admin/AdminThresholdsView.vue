@@ -12,7 +12,10 @@
                 cols="6"
                 :key="t.id"
             >
-                <ThresholdCard :threshold="t"></ThresholdCard>
+                <ThresholdCard 
+                    :threshold="t"
+                    @edit="onClickUpdateThreshold(t)"
+                ></ThresholdCard>
             </v-col>
             <v-col 
                 v-if="isFetchingThresholds"
@@ -27,11 +30,23 @@
             <v-card class="py-5">
                 <v-card-title class="text-center font-weight-bold">Create Threshold</v-card-title>
                 <ThresholdCreateForm
-                    :icons="[`mdi-water`, `mdi-water-outline`, `mdi-thermometer`]"
                     :readings
+                    :icons="[`mdi-water`, `mdi-water-outline`, `mdi-thermometer`]"
                     :disabled="isCreatingThreshold"
                     @submit="onSubmitCreateThreshold"
                 ></ThresholdCreateForm>
+            </v-card>
+        </v-dialog>
+        <v-dialog v-model="showUpdateThresholdDialog">
+            <v-card class="py-5">
+                <v-card-title class="text-center font-weight-bold">Update Threshold</v-card-title>
+                <ThresholdUpdateForm
+                    :readings
+                    :icons="[`mdi-water`, `mdi-water-outline`, `mdi-thermometer`]"
+                    :disabled="isCreatingThreshold"
+                    :threshold="thresholdToUpdate!"
+                    @submit="onSubmitUpdateThreshold"
+                ></ThresholdUpdateForm>
             </v-card>
         </v-dialog>
         <v-fab
@@ -62,6 +77,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import type { SubmissionContext } from 'vee-validate';
 import useToast from '@/composables/use-toast';
 import ThresholdCreateForm from '@/components/admin/thresholds/ThresholdCreateForm.vue';
+import ThresholdUpdateForm from '@/components/admin/thresholds/ThresholdUpdateForm.vue';
 import { useReadingStore } from '@/stores/reading';
 
 //
@@ -123,6 +139,34 @@ const onSubmitCreateThreshold = async (
     ctx.resetForm()
     toastCmp.success("Threshold created successfully.")
     showCreateThresholdDialog.value = false
+}
+
+// --- Threshold Update
+const thresholdToUpdate = ref<ThresholdSchema>()
+const isUpdatingThreshold = ref(false)
+const showUpdateThresholdDialog = ref(false)
+
+const onClickUpdateThreshold = (threshold: ThresholdSchema) => {
+    thresholdToUpdate.value = threshold
+    showUpdateThresholdDialog.value = true
+}
+
+const onSubmitUpdateThreshold = async (
+    values: ThresholdUpdateSchema,
+    ctx: SubmissionContext<{ [K in keyof ThresholdUpdateSchema]?: unknown }>
+) => {
+    if (!thresholdToUpdate.value) return
+    isUpdatingThreshold.value = true
+
+    const { res, err } = await patchThreshold(thresholdToUpdate.value.id, values)
+        .then((res) => ({ res, err: undefined }))
+        .catch((err) => ({ res: undefined, err }))
+        .finally(() => isUpdatingThreshold.value = false)
+
+    if (err) return toastCmp.error(err?.message || "Something went wrong.")
+    ctx.resetForm()
+    toastCmp.success("Threshold updated successfully.")
+    showUpdateThresholdDialog.value = false
 }
 
 //
