@@ -99,7 +99,7 @@ const { value: operator, errorMessage: operatorError } = useField<ThresholdOp>("
 //
 
 const onSubmit = handleSubmit(async (values, ctx) => {
-	const data = { ...values, icon: `${values.icon} ${color.value}` }
+	const data = { ...values, icon: `${values.icon} text-${color.value}` }
 	await Promise.resolve()
 		.then(() => props.onSubmit && props.onSubmit(data, ctx))
 		.catch(err => props.onError && props.onError(err))
