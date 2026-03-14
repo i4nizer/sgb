@@ -6,6 +6,7 @@ import MonitorView from "@/views/app/MonitorView.vue"
 import GrowthView from "@/views/app/GrowthView.vue"
 import SettingsView from "@/views/app/SettingsView.vue"
 import WelcomeView from "@/views/WelcomeView.vue"
+import AdminAccountsView from "@/views/admin/AdminAccountsView.vue"
 
 //
 
@@ -22,6 +23,13 @@ const routes: RouteRecordRaw[] = [
         meta: { layout: "auth" },
         component: SignInView,
         beforeEnter: [refreshAuth, redirectAuth],
+    },
+    {
+        path: "/admin/accounts",
+        name: "accounts",
+        meta: { layout: "admin" },
+        component: AdminAccountsView,
+        beforeEnter: [refreshAuth, requireAuth],
     },
     {
         path: "/app/home",

@@ -37,6 +37,7 @@ import { useRouter } from 'vue-router'
 import useWebsocket from './composables/use-websocket'
 import { useReadingStore } from './stores/reading'
 import type { ReadingSchema } from './schemas/ReadingSchema'
+import AdminLayout from './layouts/AdminLayout.vue'
 
 //
 
@@ -52,6 +53,7 @@ const layouts: Record<string, Component> = {
 	"app": AppLayout,
 	"auth": AuthLayout,
 	"home": HomeLayout,
+	"admin": AdminLayout,
 	"default": AppLayout,
 }
 
