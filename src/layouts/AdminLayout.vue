@@ -25,13 +25,13 @@
                 <v-icon>mdi-tune-vertical</v-icon>
                 <span>Threholds</span>
             </v-btn>
-            <v-btn to="/admin/analytics" value="analytics">
-                <v-icon>mdi-chart-line</v-icon>
-                <span>Analytics</span>
+            <v-btn to="/admin/detection" value="detection">
+                <v-icon>mdi-scan-helper</v-icon>
+                <span>Detection</span>
             </v-btn>
-            <v-btn to="/admin/audit" value="audit">
-                <v-icon>mdi-clipboard-text-clock</v-icon>
-                <span>Audit</span>
+            <v-btn to="/admin/settings" value="settings">
+                <v-icon>mdi-cog</v-icon>
+                <span>Settings</span>
             </v-btn>
         </v-bottom-navigation>
     </v-layout>
