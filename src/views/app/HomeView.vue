@@ -13,6 +13,7 @@
                     status:color="accent"
                     :icon="temperature ? temperature.icon : `mdi-thermometer`"
                     :unit="temperature ? temperature.unit : `C`"
+                    :date="temperature ? temperature.createdAt : new Date()"
                     :title="temperature ? temperature.name : `Temperature`"
                     :value="temperature?.value || 0"
                 ></ReadingCard>
@@ -24,6 +25,7 @@
                     status:color="accent"
                     :icon="humidity ? humidity.icon : `mdi-water`"
                     :unit="humidity ? humidity.unit : `%`"
+                    :date="humidity ? humidity.createdAt : new Date()"
                     :title="humidity ? humidity.name : `Humidity`"
                     :value="humidity?.value || 0"
                 ></ReadingCard>
@@ -35,6 +37,7 @@
                     status:color="accent"
                     :icon="soilMoisture ? soilMoisture.icon : `mdi-water`"
                     :unit="soilMoisture ? soilMoisture.unit : `%`"
+                    :date="soilMoisture ? soilMoisture.createdAt : new Date()"
                     :title="soilMoisture ? soilMoisture.name : `Humidity`"
                     :value="soilMoisture?.value || 0"
                 ></ReadingCard>
@@ -47,6 +50,7 @@
                     status="Review"
                     icon:color="orange"
                     status:color="orange"
+                    :date="new Date()"
                     :value="2"
                 ></ReadingCard>
             </v-col>
