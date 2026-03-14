@@ -1,6 +1,6 @@
 <template>
     <v-container class="">
-        <v-row dense>
+        <v-row dense align="center">
             <v-col cols="12">
                 <h4 class="text-grey-darken-1">Accounts</h4>
             </v-col>
@@ -10,7 +10,6 @@
                 <v-data-table
                     class="border"
                     striped="even"
-                    density="compact"
                     :headers
                     :items="users"
                     :loading="isFetchingUsers"
@@ -25,16 +24,16 @@
                     </template>
                     <template #item.actions="{ item }">
                         <v-btn
-                            size="x-small"
+                            size="small"
                             icon="mdi-pencil-outline"
                             class="text-blue bg-transparent"
                             elevation="0"
                         ></v-btn>
                         <v-btn
-                            size="x-small"
+                            size="small"
                             icon="mdi-close"
-                            class="text-red bg-transparent"
                             elevation="0"
+                            :class="`text-${authStore.user?.id == item.id ? `grey` : `red`} bg-transparent`"
                             :disabled="authStore.user?.id == item.id"
                         ></v-btn>
                     </template>
@@ -42,6 +41,38 @@
                 </v-data-table>
             </v-col>
         </v-row>
+        <v-dialog v-model="showCreateUserDialog">
+            <v-card class="py-5">
+                <v-card-title class="text-center font-weight-bold">Create User</v-card-title>
+                <UserCreateForm
+                    :disabled="isCreatingUser"
+                    @submit="onSubmitCreateUser"
+                ></UserCreateForm>
+            </v-card>
+        </v-dialog>
+        <v-fab
+            icon
+            style="z-index: 999"
+            color="accent"
+            class="position-fixed bottom-0 right-0 mb-16 mr-5"
+            location="right bottom"
+            transition="fade"
+        >
+            <v-icon>mdi-plus-circle-outline</v-icon>
+            <v-speed-dial activator="parent">
+                <v-btn 
+                    key="1"
+                    color="accent" 
+                    icon="mdi-account-plus"
+                    @click="showCreateUserDialog = true"
+                ></v-btn>
+                <v-btn 
+                    key="1"
+                    color="accent" 
+                    icon="mdi-file-delimited"
+                ></v-btn>
+            </v-speed-dial>
+        </v-fab>
     </v-container>
 </template>
 
@@ -51,10 +82,13 @@ import { UserSchema, type UserCreateSchema, type UserUpdateSchema } from "@/sche
 import { useAuthStore } from "@/stores/auth";
 import { onMounted, ref, reactive } from 'vue';
 import type { DataTableHeader } from "vuetify";
+import type { SubmissionContext } from 'vee-validate';
+import useToast from "@/composables/use-toast";
 
 //
 
-// --- Auth
+// --- Utils
+const toastCmp = useToast()
 const authStore = useAuthStore()
 
 // --- Table
@@ -93,6 +127,26 @@ const deleteUser = async (id: number, ) => {
     await api.delete<UserSchema>(`/api/user/${id}`)
     const index = users.findIndex(u => u.id == id)
     if (index != -1) users.splice(index, 1)
+}
+
+// --- User Create
+const isCreatingUser = ref(false)
+const showCreateUserDialog = ref(false)
+
+const onSubmitCreateUser = async (
+    values: UserCreateSchema,
+    ctx: SubmissionContext<{ [K in keyof UserCreateSchema]?: unknown }>
+) => {
+    isCreatingUser.value = true
+    const { res, err } = await postUser(values)
+        .then((res) => ({ res, err: undefined }))
+        .catch((err) => ({ res: undefined, err }))
+        .finally(() => isCreatingUser.value = false)
+
+    if (err) return toastCmp.error(err?.message || "")
+    ctx.resetForm()
+    toastCmp.success("User created successfully.")
+    showCreateUserDialog.value = false
 }
 
 //
