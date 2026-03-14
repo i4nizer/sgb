@@ -116,6 +116,8 @@ import useCldDetection from '@/composables/use-cld-detection';
 import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
 import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
+import { useParameterStore } from '@/stores/parameter';
+import { storeToRefs } from 'pinia';
 
 //
 
@@ -183,6 +185,10 @@ const onClickPauseFrame = async () => {
 
 //
 
+// --- Parameters
+const parameterStore = useParameterStore()
+const { minIoU, minScore, maxBoxCount } = storeToRefs(parameterStore)
+
 // --- CLD Detection
 const detections = ref<DetectionRawSchema[]>([])
 const cldDetectionCmp = useCldDetection()
@@ -196,7 +202,7 @@ const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
     
     cldDetectionBusy.value = true
     const bitmap = await createImageBitmap(canvas)
-    detections.value = await cldDetectionCmp.predict(bitmap)
+    detections.value = await cldDetectionCmp.predict(bitmap, minIoU.value, minScore.value, maxBoxCount.value)
     cldDetectionBusy.value = false
     bitmap.close()
 }
