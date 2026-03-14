@@ -9,6 +9,7 @@ import WelcomeView from "@/views/WelcomeView.vue"
 import AdminAccountsView from "@/views/admin/AdminAccountsView.vue"
 import AdminThresholdsView from "@/views/admin/AdminThresholdsView.vue"
 import AdminDetectionView from "@/views/admin/AdminDetectionView.vue"
+import AdminSettingsView from "@/views/admin/AdminSettingsView.vue"
 
 //
 
@@ -28,23 +29,30 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: "/admin/accounts",
-        name: "accounts",
+        name: "admin accounts",
         meta: { layout: "admin" },
         component: AdminAccountsView,
         beforeEnter: [refreshAuth, requireAuth],
     },
     {
         path: "/admin/thresholds",
-        name: "thresholds",
+        name: "admin thresholds",
         meta: { layout: "admin" },
         component: AdminThresholdsView,
         beforeEnter: [refreshAuth, requireAuth],
     },
     {
         path: "/admin/detection",
-        name: "detection",
+        name: "admin detection",
         meta: { layout: "admin" },
         component: AdminDetectionView,
+        beforeEnter: [refreshAuth, requireAuth],
+    },
+    {
+        path: "/admin/settings",
+        name: "admin settings",
+        meta: { layout: "admin" },
+        component: AdminSettingsView,
         beforeEnter: [refreshAuth, requireAuth],
     },
     {
