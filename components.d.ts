@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     copy: typeof import('./src/components/admin/thresholds/ThresholdCreateForm copy.vue')['default']
+    DetectionSaveForm: typeof import('./src/components/admin/detection/DetectionSaveForm.vue')['default']
     ImageBoundingBoxRenderer: typeof import('./src/components/app/growth/ImageBoundingBoxRenderer.vue')['default']
     ParticleDot: typeof import('./src/components/ParticleDot.vue')['default']
     ReadingCard: typeof import('./src/components/app/home/ReadingCard.vue')['default']
