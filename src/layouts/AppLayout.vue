@@ -43,6 +43,7 @@
 
 <style scoped>
 .v-app-bar, .blob {
+    z-index: -1;
     background: #008A17;
     background: linear-gradient(270deg, rgb(var(--v-theme-accent)) 0%, rgb(var(--v-theme-secondary)) 100%);
 }
