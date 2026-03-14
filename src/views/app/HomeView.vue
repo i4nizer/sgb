@@ -8,35 +8,35 @@
         <v-row dense>
             <v-col cols="6" sm="6" lg="4">
                 <ReadingCard
-                    icon="mdi-thermometer"
-                    unit="C"
-                    title="Temperature"
                     status="Optimal"
                     icon:color="red"
                     status:color="accent"
-                    :value="26.5"
+                    :icon="temperature ? temperature.icon : `mdi-thermometer`"
+                    :unit="temperature ? temperature.unit : `C`"
+                    :title="temperature ? temperature.name : `Temperature`"
+                    :value="temperature?.value || 0"
                 ></ReadingCard>
             </v-col>
             <v-col cols="6" sm="6" lg="4">
                 <ReadingCard
-                    icon="mdi-water-outline"
-                    unit="%"
-                    title="Humidity"
                     status="Good"
                     icon:color="blue"
                     status:color="accent"
-                    :value="26.5"
+                    :icon="humidity ? humidity.icon : `mdi-water`"
+                    :unit="humidity ? humidity.unit : `%`"
+                    :title="humidity ? humidity.name : `Humidity`"
+                    :value="humidity?.value || 0"
                 ></ReadingCard>
             </v-col>
             <v-col cols="6" sm="6" lg="4">
                 <ReadingCard
-                    icon="mdi-sprout-outline"
-                    unit="%"
-                    title="Soil Moisture"
                     status="Normal"
                     icon:color="accent"
                     status:color="accent"
-                    :value="58"
+                    :icon="soilMoisture ? soilMoisture.icon : `mdi-water`"
+                    :unit="soilMoisture ? soilMoisture.unit : `%`"
+                    :title="soilMoisture ? soilMoisture.name : `Humidity`"
+                    :value="soilMoisture?.value || 0"
                 ></ReadingCard>
             </v-col>
             <v-col cols="6" sm="6" lg="4">
@@ -56,14 +56,27 @@
 
 <script setup lang="ts">
 import ReadingCard from '@/components/app/home/ReadingCard.vue';
-import { onMounted, ref } from 'vue';
+import { useReadingStore } from '@/stores/reading';
+import { storeToRefs } from 'pinia';
+import { computed, onMounted } from 'vue';
 
 //
 
-const showWelcomeNotif = ref(false)
-setTimeout(() => showWelcomeNotif.value = false, 4000)
+// --- Reading
+const readingStore = useReadingStore()
+const { temperatures, humidities, soilMoistures } = storeToRefs(readingStore)
 
-onMounted(() => showWelcomeNotif.value = true)
+const temperature = computed(() => temperatures.value[temperatures.value.length - 1])
+const humidity = computed(() => humidities.value[humidities.value.length - 1])
+const soilMoisture = computed(() => soilMoistures.value[soilMoistures.value.length - 1])
+
+//
+
+const onMountedCb = async () => {
+    await readingStore.getReadings()
+}
+
+onMounted(onMountedCb)
 
 //
 
