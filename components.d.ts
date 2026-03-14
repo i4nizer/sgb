@@ -29,5 +29,6 @@ declare module 'vue' {
     UserDeleteForm: typeof import('./src/components/admin/accounts/UserDeleteForm.vue')['default']
     UserUpdateForm: typeof import('./src/components/admin/accounts/UserUpdateForm.vue')['default']
     VideoBoundingBoxRenderer: typeof import('./src/components/app/growth/VideoBoundingBoxRenderer.vue')['default']
+    VideoScanCard: typeof import('./src/components/app/growth/VideoScanCard.vue')['default']
   }
 }

@@ -15,68 +15,25 @@
             v-model="showScanDialog" 
             @after-leave="cameraCmp.terminate()"
         >
-            <v-card>
-                <v-card-text class="pb-0">
-                    <v-responsive class="w-100" :aspect-ratio="1">
-                        <div class="d-flex align-center justify-space-between">
-                            <h4 class="text-center text-accent font-weight-bold">Scan Coffee Leaf</h4>
-                            <v-menu open-on-hover>
-                                <template #activator="{ props }">
-                                    <v-btn
-                                        size="x-small"
-                                        icon="mdi-dots-vertical"
-                                        class="text-grey"
-                                        :="props"
-                                    ></v-btn>
-                                </template>
-                                <template #default>
-                                    <v-list density="compact">
-                                        <v-list-item 
-                                            title="Switch Camera"
-                                            prepend-icon="mdi-camera-switch"
-                                            @click="onSwitchCamera"
-                                        ></v-list-item>
-                                        <v-list-item
-                                            title="Toggle Bounding Box"
-                                            prepend-icon="mdi-selection"
-                                            :class="showDetectionBBox ? `text-accent` : `text-black`"
-                                            @click="showDetectionBBox = !showDetectionBBox"
-                                        ></v-list-item>
-                                    </v-list>
-                                </template>
-                            </v-menu>
-                        </div>
-                        <VideoBoundingBoxRenderer
-                            class="mt-1 border rounded overflow-hidden d-flex align-center justify-center"
-                            :src="stream"
-                            :freeze="freezeScanning"
-                            :detections="detections"
-                            @frame="async (c) => onDrawCameraFrame(c).catch(console.error)"
-                            @freeze="async (c) => onFreezeCapture(c).catch(console.error)"
-                        ></VideoBoundingBoxRenderer>
-                    </v-responsive>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn
-                        size="small"
-                        color="accent"
-                        :icon="freezeScanning ? `mdi-play` : `mdi-pause`"
-                        @click="onClickPauseFrame"
-                    ></v-btn>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        text="Capture"
-                        color="accent"
-                        :loading="freezeScanning && freezePurpose == `Capture`"
-                        @click="onClickCapture"
-                    ></v-btn>
-                    <v-btn
-                        text="Close"
-                        color="red"
-                        @click="onCloseDialog"
-                    ></v-btn>
-                </v-card-actions>
-            </v-card>
+            <VideoScanCard
+                :paused="freezeScanning"
+                :capturing="freezeScanning && freezePurpose == `Capture`"
+                :hide-bounding-box="!showDetectionBBox"
+                @close="onCloseDialog"
+                @pause="onClickPauseFrame"
+                @capture="onClickCapture"
+                @switch-camera="onSwitchCamera"
+                @toggle-bounding-box="showDetectionBBox = !showDetectionBBox"
+            >
+                <VideoBoundingBoxRenderer
+                    class="mt-1 border rounded overflow-hidden d-flex align-center justify-center"
+                    :src="stream"
+                    :freeze="freezeScanning"
+                    :detections="detections"
+                    @frame="async (c) => onDrawCameraFrame(c).catch(console.error)"
+                    @freeze="async (c) => onFreezeCapture(c).catch(console.error)"
+                ></VideoBoundingBoxRenderer>
+            </VideoScanCard>
         </v-dialog>
         <v-fab
             icon
@@ -118,6 +75,7 @@ import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
 import { useParameterStore } from '@/stores/parameter';
 import { storeToRefs } from 'pinia';
+import VideoScanCard from '@/components/app/growth/VideoScanCard.vue';
 
 //
 
