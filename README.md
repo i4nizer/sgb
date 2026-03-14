@@ -25,5 +25,5 @@
     - [x] Environmental Results
 - [ ] System Administration
     - [x] Manage User Accounts (Farmers & BPI Personnel)
-    - [ ] Configure Sensor Thresholds
+    - [x] Configure Sensor Thresholds
     - [ ] Disease Detection Parameters
