@@ -92,6 +92,9 @@
                     key="1"
                     color="accent" 
                     icon="mdi-file-delimited"
+                    :loading="fileSaveCmp.saving.value"
+                    :disabled="fileSaveCmp.saving.value"
+                    @click="onClickExportCsv"
                 ></v-btn>
             </v-speed-dial>
         </v-fab>
@@ -106,6 +109,8 @@ import { onMounted, ref, reactive } from 'vue';
 import type { DataTableHeader } from "vuetify";
 import type { SubmissionContext } from 'vee-validate';
 import useToast from "@/composables/use-toast";
+import useReport from "@/composables/use-report";
+import useFileSave from "@/composables/use-file-save";
 
 //
 
@@ -225,6 +230,16 @@ const onSubmitDeleteUser = async (
     ctx.resetForm()
     toastCmp.success("User deleted successfully.")
     showDeleteUserDialog.value = false
+}
+
+// --- Csv Export
+const reportCmp = useReport()
+const fileSaveCmp = useFileSave()
+
+const onClickExportCsv = async () => {
+    const csv = await reportCmp.generateCsv(users)
+    const base64 = btoa(unescape(encodeURIComponent(csv)))
+    await fileSaveCmp.saveFile(base64, "csv", `accounts-${Date.now()}.csv`)
 }
 
 //

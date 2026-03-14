@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf'
+import Papa from "papaparse"
 import html2canvas from 'html2canvas'
 
 //
@@ -6,6 +7,10 @@ import html2canvas from 'html2canvas'
 export default () => {
 
     //
+
+    const generateCsv = async (json: Object[]) => {
+        return Papa.unparse(json)
+    }
 
     const generatePDF = async (el: HTMLElement) => {
         // --- Create A4 report
@@ -53,5 +58,5 @@ export default () => {
 
     //
 
-    return { generatePDF }
+    return { generateCsv, generatePDF }
 }

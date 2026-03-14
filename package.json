@@ -34,6 +34,7 @@
 		"html2canvas": "^1.4.1",
 		"jspdf": "^4.2.0",
 		"motion-v": "^2.0.0",
+		"papaparse": "^5.5.3",
 		"pinia": "^3.0.4",
 		"pinia-plugin-persistedstate": "^4.7.1",
 		"pixi.js": "^8.16.0",
@@ -46,6 +47,7 @@
 	"devDependencies": {
 		"@tsconfig/node22": "^22.0.0",
 		"@types/node": "^22.9.0",
+		"@types/papaparse": "^5.5.2",
 		"@vitejs/plugin-vue": "^6.0.1",
 		"@vue/tsconfig": "^0.8.1",
 		"npm-run-all2": "^8.0.4",
