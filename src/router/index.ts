@@ -83,6 +83,11 @@ const routes: RouteRecordRaw[] = [
         component: SettingsView,
         beforeEnter: [refreshAuth, requireAuth],
     },
+    {
+        path: '/:pathMatch(.*)*',
+        name: "404",
+        redirect: "/",
+    },
 ]
 
 const router = createRouter({
@@ -96,7 +101,7 @@ router.beforeEach((to) => {
     const redirectPath = to.query.path as string
     const resolved = router.resolve(redirectPath)
 
-    if (resolved.matched.length > 0 && resolved.name !== 'not-found') {
+    if (resolved.matched.length > 0 && resolved.name !== '404') {
         const { path, ...remainingQuery } = to.query
         return { path: redirectPath, query: remainingQuery, replace: true }
     }
