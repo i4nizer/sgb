@@ -17,11 +17,11 @@
         >
             <VideoScanCard
                 :paused="freezeScanning"
-                :capturing="freezeScanning && freezePurpose == `Capture`"
+                :downloading="freezeFrameDownloading"
                 :hide-bounding-box="!showDetectionBBox"
                 @close="onCloseDialog"
                 @pause="onClickPauseFrame"
-                @capture="onClickCapture"
+                @download="onClickDownload"
                 @switch-camera="onSwitchCamera"
                 @toggle-bounding-box="showDetectionBBox = !showDetectionBBox"
             >
@@ -99,11 +99,12 @@ import useFileSave from '@/composables/use-file-save';
 import useCldDetection from '@/composables/use-cld-detection';
 import ImageBoundingBoxRenderer from '@/components/app/growth/ImageBoundingBoxRenderer.vue';
 import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
-import { nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
 import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
 import { useParameterStore } from '@/stores/parameter';
 import { storeToRefs } from 'pinia';
 import VideoScanCard from '@/components/app/growth/VideoScanCard.vue';
+import { blob } from 'stream/consumers';
 
 //
 
@@ -148,8 +149,10 @@ const onMountedCamera = async () => {
 // --- Scan Dialog
 const fileSaveCmp = useFileSave()
 const showScanDialog = ref(false)
-const freezePurpose = ref<"None" | "Pause" | "Capture">("None")
 const freezeScanning = ref(false)
+const freezeFrameBlob = ref<Blob>()
+const freezeFrameUploading = ref(false)
+const freezeFrameDownloading = ref(false)
 
 const onCloseDialog = async () => {
     freezeScanning.value = false
@@ -157,25 +160,29 @@ const onCloseDialog = async () => {
     detections.value = []
 }
 
-const onClickCapture = async () => {
-    freezeScanning.value = false
-    freezePurpose.value = "Capture"
-    await nextTick()
+const onClickDownload = async () => {
+    const isFreeze = freezeScanning.value
     freezeScanning.value = true
+    freezeFrameDownloading.value = true
+    while (!freezeFrameBlob.value) await new Promise(res => setTimeout(res, 100))
+
+    const reader = new FileReader()
+    reader.readAsDataURL(freezeFrameBlob.value)
+    await new Promise((res, rej) => [reader.onloadend, reader.onerror] = [res, rej])
+
+    const base64 = reader.result!.toString().split(",")[1]!
+    await fileSaveCmp.saveFile(base64, "image/jpeg", `sgb-scan-${Date.now()}.jpeg`)
+    
+    freezeScanning.value = isFreeze
+    freezeFrameDownloading.value = false
 }
 
 const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
-    if (freezePurpose.value != "Capture") return
-    const dataUrl = canvas.toDataURL("image/jpeg", 1)
-    const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1]! : dataUrl
-
-    toastCmp.success("Image captured successfully.")
-    await fileSaveCmp.saveFile(base64, "image/jpeg", `sgb-capture-${Date.now()}.jpeg`)
-    freezeScanning.value = freezePurpose.value == "Capture" ? false : freezeScanning.value
+    const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/jpeg", 1))
+    if (blob) freezeFrameBlob.value = blob
 }
 
 const onClickPauseFrame = async () => {
-    freezePurpose.value = "Pause"
     freezeScanning.value = !freezeScanning.value
 }
 

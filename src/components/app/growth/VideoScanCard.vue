@@ -49,10 +49,16 @@
             ></v-btn>
             <v-spacer></v-spacer>
             <v-btn
-                text="Capture"
+                text="Upload"
                 color="accent"
-                :loading="capturing"
-                @click="onCapture"
+                :loading="uploading"
+                @click="onUpload"
+            ></v-btn>
+            <v-btn
+                text="Download"
+                color="accent"
+                :loading="downloading"
+                @click="onDownload"
             ></v-btn>
             <v-btn
                 text="Close"
@@ -69,11 +75,13 @@
 
 const props = defineProps<{
     paused?: boolean
-    capturing?: boolean
+    uploading?: boolean
+    downloading?: boolean
     hideBoundingBox?: boolean
     onClose?: () => any
     onPause?: () => any
-    onCapture?: () => any
+    onUpload?: () => any
+    onDownload?: () => any
     onSwitchCamera?: () => any
     onToggleBoundingBox?: () => any
 }>()
