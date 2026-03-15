@@ -56,7 +56,7 @@
                     v-if="fileUpload"
                     class="d-flex align-center justify-center"
                     :src="fileUpload"
-                    :detections
+                    :detections="uploadDetections"
                     @draw="onDrawImageUpload"
                 ></ImageBoundingBoxRenderer>
             </ImageUploadCard>
@@ -83,8 +83,8 @@
                     key="1"
                     color="accent" 
                     icon="mdi-image"
-                    :loading="cldDetectionLoading"
-                    :disabled="cldDetectionLoading"
+                    :loading="cldUploadDetectionLoading"
+                    :disabled="cldUploadDetectionLoading"
                     @click="onClickImage"
                 ></v-btn>
             </v-speed-dial>
@@ -110,15 +110,17 @@ import VideoScanCard from '@/components/app/growth/VideoScanCard.vue';
 // --- Utils
 const toastCmp = useToast()
 
+// --- Parameters
+const parameterStore = useParameterStore()
+const { minIoU, minScore, maxBoxCount } = storeToRefs(parameterStore)
+
+//
+
 // --- Camera
 const cameraCmp = useCamera()
 const { stream, cameras } = cameraCmp
 const cameraIndex = ref(0)
 const cameraLoading = ref(false)
-
-const onClickImage = async () => {
-    showUploadDialog.value = true
-}
 
 const onClickCamera = async () => {
     showScanDialog.value = true
@@ -134,7 +136,14 @@ const onSwitchCamera = async () => {
     await cameraCmp.begin(cameraId)
 }
 
-//
+const onMountedCamera = async () => {
+    cameraLoading.value = true
+    await cameraCmp
+        .list()
+        .then(() => toastCmp.success("Camera initialized."))
+        .catch((e) => toastCmp.error(e?.message || "Something went wrong."))
+    cameraLoading.value = false
+}
 
 // --- Scan Dialog
 const fileSaveCmp = useFileSave()
@@ -170,11 +179,47 @@ const onClickPauseFrame = async () => {
     freezeScanning.value = !freezeScanning.value
 }
 
+// --- CLD Scan Detection
+const detections = ref<DetectionRawSchema[]>([])
+const cldDetectionCmp = useCldDetection()
+const cldDetectionBusy = ref(false)
+const showDetectionBBox = ref(true)
+const cldDetectionLoading = ref(false)
+
+const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
+    if (cldDetectionBusy.value) return;
+    if (!showDetectionBBox.value) return;
+    
+    cldDetectionBusy.value = true
+    const bitmap = await createImageBitmap(canvas)
+    const [iou, score, boxes] = [minIoU.value, minScore.value, maxBoxCount.value]
+    detections.value = await cldDetectionCmp.predict(bitmap, iou, score, boxes)
+    cldDetectionBusy.value = false
+    bitmap.close()
+}
+
+const onMountedCldScanDetection = async () => {
+    const { VITE_AI_CLD_FOLDER, VITE_AI_CLD_CLASSES } = import.meta.env
+    const [folder, classes] = [VITE_AI_CLD_FOLDER, VITE_AI_CLD_CLASSES?.split(", ")]
+
+    cldDetectionLoading.value = true
+    await cldDetectionCmp
+        .load(`${folder}/nano/model.json`, 256, classes)
+        .then(() => cldDetectionCmp.warmup())
+        .then(() => toastCmp.success("Camera scan ai model loaded."))
+        .catch((e) => toastCmp.error(e?.message || "Something went wrong."))
+    cldDetectionLoading.value = false
+}
+
 //
 
 // --- Upload Dialog
 const fileUpload = ref<File>()
 const showUploadDialog = ref(false)
+
+const onClickImage = async () => {
+    showUploadDialog.value = true
+}
 
 const onClearUploadDialog = () => {
     fileUpload.value = undefined
@@ -186,63 +231,45 @@ const onCloseUploadDialog = () => {
     detections.value = []
 }
 
-//
-
-// --- Parameters
-const parameterStore = useParameterStore()
-const { minIoU, minScore, maxBoxCount } = storeToRefs(parameterStore)
-
-// --- CLD Detection
-const detections = ref<DetectionRawSchema[]>([])
-const cldDetectionCmp = useCldDetection()
-const cldDetectionBusy = ref(false)
-const showDetectionBBox = ref(true)
-const cldDetectionLoading = ref(false)
+// --- CLD Upload Detection
+const uploadDetections = ref<DetectionRawSchema[]>([])
+const cldUploadDetectionCmp = useCldDetection()
+const cldUploadDetectionLoading = ref(false)
 
 const onDrawImageUpload = async (canvas: HTMLCanvasElement) => {
-    cldDetectionBusy.value = true
     const bitmap = await createImageBitmap(canvas)
-    detections.value = await cldDetectionCmp.predict(bitmap, minIoU.value, minScore.value, maxBoxCount.value)
+    const [iou, score, boxes] = [minIoU.value, minScore.value, maxBoxCount.value]
+    uploadDetections.value = await cldUploadDetectionCmp.predict(bitmap, iou, score, boxes)
+
+    const blob = await new Promise<Blob>((res, rej) => canvas.toBlob(b => b ? res(b) : rej(), "image/jpeg", 1))
+    console.info(URL.createObjectURL(blob))
+    console.table(uploadDetections.value)
+
     bitmap.close()
-    cldDetectionBusy.value = false
 }
 
-const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
-    if (cldDetectionBusy.value) return;
-    if (!showDetectionBBox.value) return;
-    
-    cldDetectionBusy.value = true
-    const bitmap = await createImageBitmap(canvas)
-    detections.value = await cldDetectionCmp.predict(bitmap, minIoU.value, minScore.value, maxBoxCount.value)
-    cldDetectionBusy.value = false
-    bitmap.close()
+const onMountedCldUploadDetection = async () => {
+    const { VITE_AI_CLD_FOLDER, VITE_AI_CLD_CLASSES } = import.meta.env
+    const [folder, classes] = [VITE_AI_CLD_FOLDER, VITE_AI_CLD_CLASSES?.split(", ")]
+
+    cldUploadDetectionLoading.value = true
+    await cldUploadDetectionCmp
+        .load(`${folder}/large/model.json`, 640, classes)
+        .then(() => cldUploadDetectionCmp.warmup())
+        .then(() => toastCmp.success("Image upload ai model loaded."))
+        .catch((e) => toastCmp.error(e?.message || "Something went wrong."))
+    cldUploadDetectionLoading.value = false
 }
 
 //
 
 const onMountedCb = async () => {
-    cameraLoading.value = true
-    const camprom = cameraCmp
-        .list()
-        .then(() => toastCmp.success("Camera initialized."))
-        .finally(() => cameraLoading.value = false)
-    
-    const { VITE_AI_CLD_URL, VITE_AI_CLD_IMGSZ, VITE_AI_CLD_CLASSES } = import.meta.env
-    const [url, imgsz, classes] = [VITE_AI_CLD_URL, Number(VITE_AI_CLD_IMGSZ), VITE_AI_CLD_CLASSES?.split(", ")]
-
-    cldDetectionLoading.value = true
-    const cldprom = cldDetectionCmp
-        .load(url, imgsz, classes)
-        .then(() => cldDetectionCmp.warmup())
-        .then(() => toastCmp.success("AI Model loaded."))
-        .finally(() => cldDetectionLoading.value = false)
-
-    await Promise
-        .all([camprom, cldprom])
-        .catch(toastCmp.error)
+    await Promise.all([onMountedCamera(), onMountedCldScanDetection(), onMountedCldUploadDetection()])
 }
 
-const onUnmountedCb = async () => await cldDetectionCmp.dispose()
+const onUnmountedCb = async () => {
+    await Promise.all([cldDetectionCmp.dispose(), cldUploadDetectionCmp.dispose()])
+}
 
 onMounted(onMountedCb)
 onUnmounted(onUnmountedCb)
