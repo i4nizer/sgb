@@ -47,6 +47,7 @@ const init = async () => {
 		height: size.height,
 		backgroundAlpha: 0,
 		antialias: true,
+		preserveDrawingBuffer: true,
 	})
 
 	if (!divElement.value) return
@@ -54,6 +55,9 @@ const init = async () => {
 
 	observer = new ResizeObserver(onResize)
 	observer.observe(divElement.value)
+
+	await draw()
+	await render()
 }
 
 const clean = async () => {
@@ -70,12 +74,7 @@ const draw = async () => {
 	else if (props.src instanceof HTMLImageElement) imageElement.value.src = props.src.src
 	else if (props.src instanceof File) imageElement.value.src = URL.createObjectURL(props.src)
 	else if (props.src instanceof Blob) imageElement.value.src = URL.createObjectURL(props.src)
-	
-	await new Promise<void>((resolve, reject) => {
-		if (!imageElement.value) return reject()
-		imageElement.value.onload = () => resolve()
-		imageElement.value.onerror = () => reject()
-	})
+	await new Promise((res, rej) => [imageElement.value!.onload, imageElement.value!.onerror] = [res, rej])
 
 	if (texture) texture.destroy()
 	if (sprite) sprite.destroy()
@@ -142,15 +141,8 @@ const render = async () => {
 }
 
 const dispose = async (graphics: PIXI.Graphics[], labels: PIXI.Text[]) => {
-	for (const g of graphics) {
-		app?.stage.removeChild(g)
-		g.destroy()
-	}
-
-	for (const label of labels) {
-		app?.stage.removeChild(label)
-		label.destroy()
-	}
+	graphics.forEach(g => [app?.stage.removeChild(g), g.destroy()])
+	labels.forEach(l => [app?.stage.removeChild(l), l.destroy()])
 }
 
 //
