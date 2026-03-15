@@ -92,7 +92,14 @@ const router = createRouter({
 
 router.beforeEach((to) => {
     if (!to.query.path) return
-    return to.query.path as string
+
+    const redirectPath = to.query.path as string
+    const resolved = router.resolve(redirectPath)
+
+    if (resolved.matched.length > 0 && resolved.name !== 'not-found') {
+        const { path, ...remainingQuery } = to.query
+        return { path: redirectPath, query: remainingQuery, replace: true }
+    }
 })
 
 //
