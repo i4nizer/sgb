@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli"
 
 const config: CapacitorConfig = {
 	appId: "com.sgb.app",
-	appName: "sgb",
+	appName: "SGB",
 	webDir: "dist",
 }
 
