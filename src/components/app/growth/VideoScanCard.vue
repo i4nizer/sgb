@@ -47,19 +47,21 @@
                 :icon="paused ? `mdi-play` : `mdi-pause`"
                 @click="onPause"
             ></v-btn>
-            <v-spacer></v-spacer>
             <v-btn
-                text="Upload"
+                size="small"
+                icon="mdi-upload"
                 color="accent"
                 :loading="uploading"
                 @click="onUpload"
             ></v-btn>
             <v-btn
-                text="Download"
+                size="small"
+                icon="mdi-download"
                 color="accent"
                 :loading="downloading"
                 @click="onDownload"
             ></v-btn>
+            <v-spacer></v-spacer>
             <v-btn
                 text="Close"
                 color="red"

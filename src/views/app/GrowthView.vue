@@ -17,10 +17,12 @@
         >
             <VideoScanCard
                 :paused="freezeScanning"
+                :uploading="freezeFrameUploading"
                 :downloading="freezeFrameDownloading"
                 :hide-bounding-box="!showDetectionBBox"
                 @close="onCloseDialog"
                 @pause="onClickPauseFrame"
+                @upload="onClickUpload"
                 @download="onClickDownload"
                 @switch-camera="onSwitchCamera"
                 @toggle-bounding-box="showDetectionBBox = !showDetectionBBox"
@@ -32,6 +34,7 @@
                     :detections="detections"
                     @frame="async (c) => onDrawCameraFrame(c).catch(console.error)"
                     @freeze="async (c) => onFreezeCapture(c).catch(console.error)"
+                    @render="async (c) => onRenderDetectionFrame(c).catch(console.error)"
                 ></VideoBoundingBoxRenderer>
             </VideoScanCard>
         </v-dialog>
@@ -105,6 +108,8 @@ import { useParameterStore } from '@/stores/parameter';
 import { storeToRefs } from 'pinia';
 import VideoScanCard from '@/components/app/growth/VideoScanCard.vue';
 import { blob } from 'stream/consumers';
+import { api } from '@/plugins/api';
+import type { CaptureSchema } from '@/schemas/CaptureSchema';
 
 //
 
@@ -150,7 +155,8 @@ const onMountedCamera = async () => {
 const fileSaveCmp = useFileSave()
 const showScanDialog = ref(false)
 const freezeScanning = ref(false)
-const freezeFrameBlob = ref<Blob>()
+const scanDrawFrameBlob = ref<Blob>()
+const scanRenderFrameBlob = ref<Blob>()
 const freezeFrameUploading = ref(false)
 const freezeFrameDownloading = ref(false)
 
@@ -160,14 +166,30 @@ const onCloseDialog = async () => {
     detections.value = []
 }
 
+const onClickUpload = async () => {
+    if (!scanDrawFrameBlob.value) return
+    const isFreeze = freezeScanning.value
+    freezeScanning.value = true
+    freezeFrameUploading.value = true
+
+    const form = new FormData()
+    form.append("object", "Leaf")
+    form.append("image", scanDrawFrameBlob.value)
+    const cres = await api.postForm<CaptureSchema>("/api/capture", form)
+    await api.post(`/api/capture/${cres.data.id}/detection/bulk`, detections.value)
+
+    freezeScanning.value = isFreeze
+    freezeFrameUploading.value = false
+}
+
 const onClickDownload = async () => {
     const isFreeze = freezeScanning.value
     freezeScanning.value = true
     freezeFrameDownloading.value = true
-    while (!freezeFrameBlob.value) await new Promise(res => setTimeout(res, 100))
+    while (!scanRenderFrameBlob.value) await new Promise(res => setTimeout(res, 100))
 
     const reader = new FileReader()
-    reader.readAsDataURL(freezeFrameBlob.value)
+    reader.readAsDataURL(scanRenderFrameBlob.value)
     await new Promise((res, rej) => [reader.onloadend, reader.onerror] = [res, rej])
 
     const base64 = reader.result!.toString().split(",")[1]!
@@ -179,7 +201,7 @@ const onClickDownload = async () => {
 
 const onFreezeCapture = async (canvas: HTMLCanvasElement) => {
     const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/jpeg", 1))
-    if (blob) freezeFrameBlob.value = blob
+    if (blob) scanRenderFrameBlob.value = blob
 }
 
 const onClickPauseFrame = async () => {
@@ -194,6 +216,9 @@ const showDetectionBBox = ref(true)
 const cldDetectionLoading = ref(false)
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
+    const blob = await new Promise<Blob>((res, rej) => canvas.toBlob((b) => b ? res(b) : rej()))
+    scanDrawFrameBlob.value = blob
+
     if (cldDetectionBusy.value) return;
     if (!showDetectionBBox.value) return;
     
@@ -203,6 +228,11 @@ const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
     detections.value = await cldDetectionCmp.predict(bitmap, iou, score, boxes)
     cldDetectionBusy.value = false
     bitmap.close()
+}
+
+const onRenderDetectionFrame = async (canvas: HTMLCanvasElement) => {
+    const blob = await new Promise<Blob>((res, rej) => canvas.toBlob((b) => b ? res(b) : rej()))
+    scanRenderFrameBlob.value = blob
 }
 
 const onMountedCldScanDetection = async () => {
