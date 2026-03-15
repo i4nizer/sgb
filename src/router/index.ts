@@ -90,6 +90,11 @@ const router = createRouter({
     routes,
 })
 
+router.beforeEach((to) => {
+    if (!to.query.path) return
+    return to.query.path as string
+})
+
 //
 
 export default router
