@@ -40,49 +40,26 @@
             location="center"
             v-model="showUploadDialog" 
         >
-            <v-card>
-                <v-card-text class="pb-0">
-                    <v-responsive 
-                        class="w-100" 
-                        :aspect-ratio="1"
-                    >
-                        <div class="d-flex align-center justify-space-between">
-                            <h4 class="pb-2 text-center text-accent font-weight-bold">
-                                Upload Coffee Leaf
-                            </h4>
-                        </div>
-                        <v-file-upload
-                            v-if="!fileUpload"
-                            rounded
-                            clearable
-                            show-size
-                            accept="image/*"
-                            v-model="fileUpload"
-                        ></v-file-upload>
-                        <ImageBoundingBoxRenderer
-                            v-if="fileUpload"
-                            class="d-flex align-center justify-center"
-                            :src="fileUpload"
-                            :detections
-                            @draw="onDrawImageUpload"
-                        ></ImageBoundingBoxRenderer>
-                    </v-responsive>
-                </v-card-text>
-                <v-card-actions class="px-5">
-                    <v-btn
-                        icon="mdi-delete-outline"
-                        size="small"
-                        color="red"
-                        @click="onClearUploadDialog"
-                    ></v-btn>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        text="Close"
-                        color="red"
-                        @click="onCloseUploadDialog"
-                    ></v-btn>
-                </v-card-actions>
-            </v-card>
+            <ImageUploadCard
+                @clear="onClearUploadDialog"
+                @close="onCloseUploadDialog"
+            >
+                <v-file-upload
+                    v-if="!fileUpload"
+                    rounded
+                    clearable
+                    show-size
+                    accept="image/*"
+                    v-model="fileUpload"
+                ></v-file-upload>
+                <ImageBoundingBoxRenderer
+                    v-if="fileUpload"
+                    class="d-flex align-center justify-center"
+                    :src="fileUpload"
+                    :detections
+                    @draw="onDrawImageUpload"
+                ></ImageBoundingBoxRenderer>
+            </ImageUploadCard>
         </v-dialog>
         <v-fab
             icon
