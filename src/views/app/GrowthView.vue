@@ -35,6 +35,55 @@
                 ></VideoBoundingBoxRenderer>
             </VideoScanCard>
         </v-dialog>
+        <v-dialog 
+            class="w-100 w-md-50 w-lg-33"
+            location="center"
+            v-model="showUploadDialog" 
+        >
+            <v-card>
+                <v-card-text class="pb-0">
+                    <v-responsive 
+                        class="w-100" 
+                        :aspect-ratio="1"
+                    >
+                        <div class="d-flex align-center justify-space-between">
+                            <h4 class="pb-2 text-center text-accent font-weight-bold">
+                                Upload Coffee Leaf
+                            </h4>
+                        </div>
+                        <v-file-upload
+                            v-if="!fileUpload"
+                            rounded
+                            clearable
+                            show-size
+                            accept="image/*"
+                            v-model="fileUpload"
+                        ></v-file-upload>
+                        <ImageBoundingBoxRenderer
+                            v-if="fileUpload"
+                            class="d-flex align-center justify-center"
+                            :src="fileUpload"
+                            :detections
+                            @draw="onDrawImageUpload"
+                        ></ImageBoundingBoxRenderer>
+                    </v-responsive>
+                </v-card-text>
+                <v-card-actions class="px-5">
+                    <v-btn
+                        icon="mdi-delete-outline"
+                        size="small"
+                        color="red"
+                        @click="onClearUploadDialog"
+                    ></v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        text="Close"
+                        color="red"
+                        @click="onCloseUploadDialog"
+                    ></v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
         <v-fab
             icon
             style="z-index: 9999"
@@ -54,10 +103,11 @@
                     @click="onClickCamera"
                 ></v-btn>
                 <v-btn 
-                    disabled
                     key="1"
                     color="accent" 
                     icon="mdi-image"
+                    :loading="cldDetectionLoading"
+                    :disabled="cldDetectionLoading"
                     @click="onClickImage"
                 ></v-btn>
             </v-speed-dial>
@@ -70,6 +120,7 @@ import useToast from '@/composables/use-toast';
 import useCamera from '@/composables/use-camera';
 import useFileSave from '@/composables/use-file-save';
 import useCldDetection from '@/composables/use-cld-detection';
+import ImageBoundingBoxRenderer from '@/components/app/growth/ImageBoundingBoxRenderer.vue';
 import VideoBoundingBoxRenderer from '@/components/app/growth/VideoBoundingBoxRenderer.vue';
 import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import type { DetectionRawSchema } from '@/schemas/DetectionSchema';
@@ -89,7 +140,7 @@ const cameraIndex = ref(0)
 const cameraLoading = ref(false)
 
 const onClickImage = async () => {
-
+    showUploadDialog.value = true
 }
 
 const onClickCamera = async () => {
@@ -117,6 +168,7 @@ const freezeScanning = ref(false)
 const onCloseDialog = async () => {
     freezeScanning.value = false
     showScanDialog.value = false
+    detections.value = []
 }
 
 const onClickCapture = async () => {
@@ -143,6 +195,22 @@ const onClickPauseFrame = async () => {
 
 //
 
+// --- Upload Dialog
+const fileUpload = ref<File>()
+const showUploadDialog = ref(false)
+
+const onClearUploadDialog = () => {
+    fileUpload.value = undefined
+}
+
+const onCloseUploadDialog = () => {
+    showUploadDialog.value = false
+    fileUpload.value = undefined
+    detections.value = []
+}
+
+//
+
 // --- Parameters
 const parameterStore = useParameterStore()
 const { minIoU, minScore, maxBoxCount } = storeToRefs(parameterStore)
@@ -153,6 +221,14 @@ const cldDetectionCmp = useCldDetection()
 const cldDetectionBusy = ref(false)
 const showDetectionBBox = ref(true)
 const cldDetectionLoading = ref(false)
+
+const onDrawImageUpload = async (canvas: HTMLCanvasElement) => {
+    cldDetectionBusy.value = true
+    const bitmap = await createImageBitmap(canvas)
+    detections.value = await cldDetectionCmp.predict(bitmap, minIoU.value, minScore.value, maxBoxCount.value)
+    bitmap.close()
+    cldDetectionBusy.value = false
+}
 
 const onDrawCameraFrame = async (canvas: HTMLCanvasElement) => {
     if (cldDetectionBusy.value) return;
