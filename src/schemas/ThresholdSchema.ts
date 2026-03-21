@@ -25,6 +25,7 @@ const ThresholdQuerySchema = ThresholdSchema
 
 const ThresholdCreateSchema = ThresholdSchema.omit({ id: true, createdAt: true, updatedAt: true })
 const ThresholdUpdateSchema = ThresholdSchema.omit({ id: true, createdAt: true, updatedAt: true }).partial()
+const ThresholdDeleteSchema = ThresholdSchema.pick({ reading: true })
 
 //
 
@@ -32,6 +33,7 @@ type ThresholdSchema = z.infer<typeof ThresholdSchema>
 type ThresholdQuerySchema = z.infer<typeof ThresholdQuerySchema>
 type ThresholdCreateSchema = z.infer<typeof ThresholdCreateSchema>
 type ThresholdUpdateSchema = z.infer<typeof ThresholdUpdateSchema>
+type ThresholdDeleteSchema = z.infer<typeof ThresholdDeleteSchema>
 
 //
 
@@ -41,4 +43,5 @@ export {
     ThresholdQuerySchema,
     ThresholdCreateSchema,
     ThresholdUpdateSchema,
+    ThresholdDeleteSchema,
 }
