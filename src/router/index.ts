@@ -1,15 +1,18 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router"
 import { redirectAuth, refreshAuth, requireAuth } from "@/middlewares/auth.middleware"
-import SignInView from "@/views/auth/SignInView.vue"
-import HomeView from "@/views/app/HomeView.vue"
-import MonitorView from "@/views/app/MonitorView.vue"
-import GrowthView from "@/views/app/GrowthView.vue"
-import SettingsView from "@/views/app/SettingsView.vue"
-import WelcomeView from "@/views/WelcomeView.vue"
-import AdminAccountsView from "@/views/admin/AdminAccountsView.vue"
-import AdminThresholdsView from "@/views/admin/AdminThresholdsView.vue"
-import AdminDetectionView from "@/views/admin/AdminDetectionView.vue"
-import AdminSettingsView from "@/views/admin/AdminSettingsView.vue"
+
+//
+
+const SignInView = () => import("@/views/auth/SignInView.vue")
+const HomeView = () => import("@/views/app/HomeView.vue")
+const MonitorView = () => import("@/views/app/MonitorView.vue")
+const GrowthView = () => import("@/views/app/GrowthView.vue")
+const SettingsView = () => import("@/views/app/SettingsView.vue")
+const WelcomeView = () => import("@/views/WelcomeView.vue")
+const AdminAccountsView = () => import("@/views/admin/AdminAccountsView.vue")
+const AdminThresholdsView = () => import("@/views/admin/AdminThresholdsView.vue")
+const AdminDetectionView = () => import("@/views/admin/AdminDetectionView.vue")
+const AdminSettingsView = () => import("@/views/admin/AdminSettingsView.vue")
 
 //
 
