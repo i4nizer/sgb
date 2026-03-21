@@ -7,6 +7,7 @@
     - [x] Temperature
     - [x] Humidity
     - [x] Soil Moisture
+    - [ ] Auto Watering
 - [ ] Growth Monitoring
     - [ ] Record Seedling Growth Data
     - [ ] Generate Growth Reports

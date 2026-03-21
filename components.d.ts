@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    copy: typeof import('./src/components/admin/thresholds/ThresholdUpdateForm copy.vue')['default']
     ImageBoundingBoxRenderer: typeof import('./src/components/app/growth/ImageBoundingBoxRenderer.vue')['default']
     ImageUploadCard: typeof import('./src/components/app/growth/ImageUploadCard.vue')['default']
     ParticleDot: typeof import('./src/components/ParticleDot.vue')['default']
@@ -21,6 +22,8 @@ declare module 'vue' {
     SignInForm: typeof import('./src/components/auth/SignInForm.vue')['default']
     ThresholdCard: typeof import('./src/components/admin/thresholds/ThresholdCard.vue')['default']
     ThresholdCreateForm: typeof import('./src/components/admin/thresholds/ThresholdCreateForm.vue')['default']
+    ThresholdDeleteForm: typeof import('./src/components/admin/thresholds/ThresholdDeleteForm.vue')['default']
+    ThresholDeleteForm: typeof import('./src/components/admin/thresholds/ThresholDeleteForm.vue')['default']
     ThresholdUpdateForm: typeof import('./src/components/admin/thresholds/ThresholdUpdateForm.vue')['default']
     ToastQueue: typeof import('./src/components/ToastQueue.vue')['default']
     UserCreateForm: typeof import('./src/components/admin/accounts/UserCreateForm.vue')['default']

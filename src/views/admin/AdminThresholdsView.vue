@@ -9,18 +9,21 @@
             <v-col 
                 v-if="!isFetchingThresholds"
                 v-for="t in thresholds"
-                cols="6"
+                cols="12"
+                md="6"
                 :key="t.id"
             >
                 <ThresholdCard 
                     :threshold="t"
                     @edit="onClickUpdateThreshold(t)"
+                    @delete="onClickDeleteThreshold(t)"
                 ></ThresholdCard>
             </v-col>
             <v-col 
                 v-if="isFetchingThresholds"
                 v-for="n in [1, 2, 3, 4]"
-                cols="6"
+                cols="12"
+                md="6"
                 :key="n"
             >
                 <v-skeleton-loader type="article"></v-skeleton-loader>
@@ -43,10 +46,22 @@
                 <ThresholdUpdateForm
                     :readings
                     :icons="[`mdi-water`, `mdi-water-outline`, `mdi-thermometer`]"
-                    :disabled="isCreatingThreshold"
+                    :disabled="isUpdatingThreshold"
                     :threshold="thresholdToUpdate!"
                     @submit="onSubmitUpdateThreshold"
                 ></ThresholdUpdateForm>
+            </v-card>
+        </v-dialog>
+        <v-dialog v-model="showDeleteThresholdDialog">
+            <v-card class="py-5">
+                <v-card-title class="text-center font-weight-bold">Delete Threshold</v-card-title>
+                <ThresholdDeleteForm
+                    :readings
+                    :icons="[`mdi-water`, `mdi-water-outline`, `mdi-thermometer`]"
+                    :disabled="isDeletingThreshold"
+                    :threshold="thresholdToDelete!"
+                    @submit="onSubmitDeleteThreshold"
+                ></ThresholdDeleteForm>
             </v-card>
         </v-dialog>
         <v-fab
@@ -72,12 +87,14 @@
 
 <script setup lang="ts">
 import { api } from '@/plugins/api'
-import { ThresholdSchema, type ThresholdCreateSchema, type ThresholdUpdateSchema } from '@/schemas/ThresholdSchema'
+import { ThresholdDeleteSchema, ThresholdSchema, type ThresholdCreateSchema, type ThresholdUpdateSchema } from '@/schemas/ThresholdSchema'
 import { computed, onMounted, reactive, ref } from 'vue'
 import type { SubmissionContext } from 'vee-validate';
 import useToast from '@/composables/use-toast';
+import ThresholdCard from '@/components/admin/thresholds/ThresholdCard.vue';
 import ThresholdCreateForm from '@/components/admin/thresholds/ThresholdCreateForm.vue';
 import ThresholdUpdateForm from '@/components/admin/thresholds/ThresholdUpdateForm.vue';
+import ThresholdDeleteForm from '@/components/admin/thresholds/ThresholdDeleteForm.vue';
 import { useReadingStore } from '@/stores/reading';
 
 //
@@ -167,6 +184,34 @@ const onSubmitUpdateThreshold = async (
     ctx.resetForm()
     toastCmp.success("Threshold updated successfully.")
     showUpdateThresholdDialog.value = false
+}
+
+// --- Threshold Delete
+const thresholdToDelete = ref<ThresholdSchema>()
+const isDeletingThreshold = ref(false)
+const showDeleteThresholdDialog = ref(false)
+
+const onClickDeleteThreshold = (threshold: ThresholdSchema) => {
+    thresholdToDelete.value = threshold
+    showDeleteThresholdDialog.value = true
+}
+
+const onSubmitDeleteThreshold = async (
+    values: ThresholdDeleteSchema,
+    ctx: SubmissionContext<{ [K in keyof ThresholdDeleteSchema]?: unknown }>
+) => {
+    if (!thresholdToDelete.value) return
+    isDeletingThreshold.value = true
+
+    const { res, err } = await deleteThreshold(thresholdToDelete.value.id)
+        .then((res) => ({ res, err: undefined }))
+        .catch((err) => ({ res: undefined, err }))
+        .finally(() => isDeletingThreshold.value = false)
+
+    if (err) return toastCmp.error(err?.message || "Something went wrong.")
+    ctx.resetForm()
+    toastCmp.success("Threshold deleted successfully.")
+    showDeleteThresholdDialog.value = false
 }
 
 //
