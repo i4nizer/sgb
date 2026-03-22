@@ -38,6 +38,7 @@ import useWebsocket from './composables/use-websocket'
 import { useReadingStore } from './stores/reading'
 import type { ReadingSchema } from './schemas/ReadingSchema'
 import AdminLayout from './layouts/AdminLayout.vue'
+import { PushNotifications, type PushNotificationSchema } from '@capacitor/push-notifications'
 
 //
 
@@ -69,6 +70,12 @@ const onWsReading = (data: ReadingSchema[]) => {
 	readingStore.readings.push(...data)
 }
 
+// --- Push Notifications
+const onReceivedPushNotification = (notification: PushNotificationSchema) => {
+	if (!notification.title || !notification.body) return
+	toastCmp.info(notification.title)
+}
+
 //
 
 const onMountedCb = async () => {
@@ -92,6 +99,7 @@ const onMountedCb = async () => {
 
 	// --- Push Notifications
 	if (authStore.user) await pushStore.connect()
+	if (native) PushNotifications.addListener("pushNotificationReceived", onReceivedPushNotification)
 }
 
 onMounted(onMountedCb)
