@@ -96,6 +96,8 @@ import ThresholdCreateForm from '@/components/admin/thresholds/ThresholdCreateFo
 import ThresholdUpdateForm from '@/components/admin/thresholds/ThresholdUpdateForm.vue';
 import ThresholdDeleteForm from '@/components/admin/thresholds/ThresholdDeleteForm.vue';
 import { useReadingStore } from '@/stores/reading';
+import { useThresholdStore } from '@/stores/threshold';
+import { storeToRefs } from 'pinia';
 
 //
 
@@ -107,36 +109,10 @@ const readingStore = useReadingStore()
 const readings = computed(() => [...new Set(readingStore.readings.map(r => r.name)).values()])
 
 // --- Thresholds
-const thresholds = reactive<ThresholdSchema[]>([])
+const thresholdStore = useThresholdStore()
+const { thresholds } = storeToRefs(thresholdStore)
+const { getThresholds, postThreshold, patchThreshold, deleteThreshold } = thresholdStore
 const isFetchingThresholds = ref(false)
-
-const getThresholds = async () => {
-    const res = await api.get<ThresholdSchema[]>("/api/threshold")
-    thresholds.splice(0, thresholds.length)
-    thresholds.push(...res.data.map((r) => ThresholdSchema.parse(r)))
-    return res.data
-}
-
-const postThreshold = async (data: ThresholdCreateSchema) => {
-    const res = await api.post<ThresholdSchema>("/api/threshold", data)
-    const parsed = ThresholdSchema.parse(res.data)
-    thresholds.push(parsed)
-    return parsed
-}
-
-const patchThreshold = async (id: number, data: ThresholdUpdateSchema) => {
-    const res = await api.patch<ThresholdSchema>(`/api/threshold/${id}`, data)
-    const parsed = ThresholdSchema.parse(res.data)
-    const index = thresholds.findIndex(u => u.id == id)
-    if (index != -1) thresholds.splice(index, 1, parsed)
-    return parsed
-}
-
-const deleteThreshold = async (id: number, ) => {
-    await api.delete<ThresholdSchema>(`/api/threshold/${id}`)
-    const index = thresholds.findIndex(u => u.id == id)
-    if (index != -1) thresholds.splice(index, 1)
-}
 
 // --- Threshold Create
 const isCreatingThreshold = ref(false)
