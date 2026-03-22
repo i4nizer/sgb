@@ -1,6 +1,13 @@
 <template>
 	<v-app class="bg-primary">
 		<v-progress-linear
+			v-if="busy && !alive"
+			indeterminate
+			color="red"
+			class="position-fixed top-0 left-0"
+			style="z-index: 1000"
+		></v-progress-linear>
+		<v-progress-linear
 			v-if="isRouting"
 			indeterminate
 			color="accent"
@@ -32,13 +39,15 @@ import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { useAuthStore } from './stores/auth'
 import { usePushStore } from './stores/push'
-import { onMounted, ref, type Component } from 'vue'
+import { onMounted, ref, watch, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import useWebsocket from './composables/use-websocket'
 import { useReadingStore } from './stores/reading'
 import type { ReadingSchema } from './schemas/ReadingSchema'
 import AdminLayout from './layouts/AdminLayout.vue'
 import { PushNotifications, type PushNotificationSchema } from '@capacitor/push-notifications'
+import { useServerStore } from './stores/server'
+import { storeToRefs } from 'pinia'
 
 //
 
@@ -57,6 +66,11 @@ const layouts: Record<string, Component> = {
 	"admin": AdminLayout,
 	"default": HomeLayout,
 }
+
+// --- Server
+const serverStore = useServerStore()
+const { busy, alive } = storeToRefs(serverStore)
+watch(alive, nv => toastCmp.show(`${nv ? "C" : "Disc"}onnected to server.`, nv ? "green" : "red"))
 
 // --- Router
 const routerCmp = useRouter()
@@ -92,6 +106,9 @@ const onMountedCb = async () => {
 	if (native) StatusBar.setBackgroundColor({ color: "#00000000" })
 	if (native) StatusBar.setOverlaysWebView({ overlay: true })
 	if (native) StatusBar.setStyle({ style: savedTheme == "dark" ? Style.Dark : Style.Light })
+
+	// --- Server
+	await serverStore.connect(import.meta.env.VITE_API_URL)
 
 	// --- Route Loader
 	routerCmp.beforeEach(() => isRouting.value = true)
