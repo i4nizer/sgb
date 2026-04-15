@@ -43,11 +43,12 @@ import { onMounted, ref, watch, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import useWebsocket from './composables/use-websocket'
 import { useReadingStore } from './stores/reading'
-import type { ReadingSchema } from './schemas/ReadingSchema'
+import { ReadingSchema } from './schemas/ReadingSchema'
 import AdminLayout from './layouts/AdminLayout.vue'
 import { PushNotifications, type PushNotificationSchema } from '@capacitor/push-notifications'
 import { useServerStore } from './stores/server'
 import { storeToRefs } from 'pinia'
+import z from 'zod'
 
 //
 
@@ -81,7 +82,8 @@ const websocketCmp = useWebsocket()
 const readingStore = useReadingStore()
 
 const onWsReading = (data: ReadingSchema[]) => {
-	readingStore.readings.push(...data)
+	const parsed = z.array(ReadingSchema).parse(data)
+	readingStore.readings.push(...parsed)
 }
 
 // --- Push Notifications
