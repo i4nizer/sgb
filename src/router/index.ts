@@ -9,6 +9,7 @@ const MonitorView = () => import("@/views/app/MonitorView.vue")
 const GrowthView = () => import("@/views/app/GrowthView.vue")
 const SettingsView = () => import("@/views/app/SettingsView.vue")
 const WelcomeView = () => import("@/views/WelcomeView.vue")
+const GuideView = () => import("@/views/GuideView.vue")
 const AdminAccountsView = () => import("@/views/admin/AdminAccountsView.vue")
 const AdminThresholdsView = () => import("@/views/admin/AdminThresholdsView.vue")
 const AdminDetectionView = () => import("@/views/admin/AdminDetectionView.vue")
@@ -22,6 +23,12 @@ const routes: RouteRecordRaw[] = [
         name: "welcome",
         meta: { layout: "home" },
         component: WelcomeView,
+    },
+    {
+        path: "/home",
+        name: "guide",
+        meta: { layout: "home" },
+        component: GuideView,
     },
     {
         path: "/auth/sign-in",

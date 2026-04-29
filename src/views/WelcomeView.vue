@@ -21,10 +21,10 @@
             <v-col cols="12" class="d-flex justify-center">
             </v-col>
         </v-row>
-        <v-sheet 
+        <v-sheet
             color="transparent"
-            class="d-flex justify-center position-absolute left-0 bottom-0 mb-16"
-            width="100%" 
+            class="d-flex flex-column align-center position-absolute left-0 bottom-0 mb-16 ga-3"
+            width="100%"
         >
             <v-btn
                 to="/auth/sign-in"
@@ -35,6 +35,11 @@
                 elevation="1"
                 append-icon="mdi-chevron-right"
             ></v-btn>
+            <router-link
+                to="/home"
+                class="text-caption text-white text-decoration-none"
+                style="z-index: 999; opacity: 0.7;"
+            >How does this work?</router-link>
         </v-sheet>
         <ParticleDot
             v-for="particle in particles"
